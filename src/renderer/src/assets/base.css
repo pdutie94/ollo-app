@@ -1,0 +1,125 @@
+/* ───── Theme Variables (exactly from design-guide.md) ───── */
+
+:root {
+  /* Primary */
+  --primary: #6D5DFC;
+  --primary-hover: #7C6FFF;
+  --primary-light: #A89DFF;
+
+  /* Light Background */
+  --bg-main: #F5F7FA;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+
+  /* Light Border */
+  --border: #E5E9F2;
+  --border-light: #D1D5E0;
+
+  /* Light Text */
+  --text-primary: #1E2430;
+  --text-secondary: #6B7280;
+  --text-muted: #8A94A6;
+
+  /* Status */
+  --success: #23C16B;
+  --warning: #F7B731;
+  --danger: #FF5B5B;
+  --info: #2D9CDB;
+
+  /* Table hover/selected */
+  --bg-hover: rgba(109, 93, 252, 0.06);
+  --bg-selected: rgba(109, 93, 252, 0.15);
+
+  /* Modal & Overlay */
+  --bg-overlay: rgba(0, 0, 0, 0.4);
+  --bg-input: #F5F7FA;
+
+  /* Shadows */
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  /* Subtle accents */
+  --primary-subtle: rgba(109, 93, 252, 0.1);
+  --success-bg: #E8FAF0;
+  --success-text: #1A8B4E;
+  --danger-bg: #FFEBEB;
+  --danger-text: #CC3333;
+  --warning-bg: #FFF8E8;
+  --warning-text: #C7951A;
+}
+
+.dark {
+  /* Dark Background */
+  --bg-main: #0B0D12;
+  --bg-sidebar: #0F1117;
+  --bg-card: #131722;
+
+  /* Dark Border */
+  --border: #232938;
+  --border-light: #2E3446;
+
+  /* Dark Text */
+  --text-primary: #F5F7FA;
+  --text-secondary: #A6ADBB;
+  --text-muted: #6D7485;
+
+  /* Table hover dark */
+  --bg-hover: rgba(109, 93, 252, 0.08);
+  --bg-selected: rgba(109, 93, 252, 0.15);
+
+  /* Status colors same as light */
+  --success: #23C16B;
+  --warning: #F7B731;
+  --danger: #FF5B5B;
+  --info: #2D9CDB;
+
+  /* Modal & Overlay */
+  --bg-overlay: rgba(0, 0, 0, 0.6);
+  --bg-input: #1A1D2B;
+
+  /* Shadows (darker) */
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+
+  /* Subtle accents (dark) */
+  --primary-subtle: rgba(109, 93, 252, 0.1);
+  --success-bg: rgba(35, 193, 107, 0.12);
+  --success-text: #23C16B;
+  --danger-bg: rgba(255, 91, 91, 0.12);
+  --danger-text: #FF5B5B;
+  --warning-bg: rgba(247, 183, 49, 0.12);
+  --warning-text: #F7B731;
+}
+
+/* ───── Reset ───── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text-primary);
+  background: var(--bg-main);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  user-select: none;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

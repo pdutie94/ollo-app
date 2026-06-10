@@ -1,0 +1,54 @@
+---
+alwaysApply: true
+description: "Quy tắc chung cho dự án Ollo - Electron + Vite + React + TypeScript"
+---
+
+## Dự án Ollo – MVP
+
+**Stack cố định:**
+- Electron 33+ (dùng ESM, Node 20+)
+- Vite 6+ (cấu hình qua electron-vite 2+)
+- React 19+ (strict mode, dùng functional components, hooks)
+- TypeScript 5+ (strict, không dùng `any`)
+- Tailwind CSS v4 (dùng plugin `@tailwindcss/vite`)
+- Zustand 5+ (có immer)
+- better-sqlite3 11+ (native module)
+- Drizzle ORM (latest) + drizzle-kit để quản lý schema
+- electron-builder 25+ để đóng gói
+
+**Cấu trúc dự án (electron-vite chuẩn):**
+- `src/main/` – Process chính (Node.js)
+- `src/preload/` – Preload scripts (cầu nối)
+- `src/renderer/` – React app (static, không SSR)
+
+**Nguyên tắc bắt buộc:**
+1. Tất cả communication giữa renderer và main phải qua IPC thông qua preload. Renderer **không được** import trực tiếp `electron`, `fs`, `path`, hoặc bất kỳ module Node.js nào.
+2. Sử dụng absolute import: `@/` trỏ đến `src/renderer/`, `@main/` trỏ đến `src/main/`. Cấu hình alias trong `tsconfig.web.json` và `vite.config`.
+3. Profile trình duyệt dùng `<webview>` với `partition="persist:profile_<id>"`. **Không** tạo nhiều `BrowserWindow` để mở profile.
+4. Proxy được set qua `session.fromPartition('persist:...').setProxy(...)` từ main process (IPC handler).
+5. Extension được load qua `session.loadExtension(path)` từ main process (unpacked).
+6. Mọi package phải là phiên bản mới nhất, **không dùng package deprecated** (ví dụ: electron-store đã deprecated, thay bằng `conf` hoặc tự quản lý file JSON). Ưu tiên dùng `fetch` native thay vì `axios`.
+7. Code phải modular: mỗi service (profile, proxy, session) có file riêng trong `src/main/services/`. Component React mỗi cái một file trong `src/renderer/components/`.
+8. TypeScript: dùng `interface` cho object shapes, `type` cho unions/primitives. Mọi function phải có return type rõ ràng, hạn chế `any` tối đa.
+9. Tailwind: sử dụng utility classes, không viết CSS thuần trừ khi cần override phức tạp. Dùng `clsx` hoặc `tailwind-merge` để quản lý class động.
+10. Database: schema định nghĩa bằng Drizzle ORM trong `src/main/db/schema.ts`. Migration dùng `drizzle-kit`. Chỉ main process mới được phép đọc/ghi DB.
+
+**Phong cách code:**
+- Đặt tên biến/components rõ ràng (ví dụ: `ProfileManager`, `useProfileStore`, `proxyList`).
+- Comment bằng tiếng Anh (ngắn gọn).
+- Sử dụng `async/await` cho các tác vụ bất đồng bộ, bắt lỗi với `try/catch` có log lỗi.
+- Export named function/component, tránh `export default`.
+
+**Khi sinh code:**
+- Phải kiểm tra cấu trúc thư mục hiện tại, đặt file đúng chỗ.
+- Dùng `import` ESM, không dùng `require`.
+- Nếu cần native module (better-sqlite3), phải cấu hình `electron-vite` externalize đúng (đã có plugin mặc định, nhưng nếu lỗi thì sửa trong `electron.vite.config.ts`).
+
+**MVP scope (chỉ làm những gì được liệt kê, không thêm):**
+- Quản lý profile (CRUD, groups, tags, notes)
+- Gán proxy (HTTP/HTTPS/SOCKS5, có auth)
+- Test proxy (từ main process)
+- Mở profile trong webview
+- Cài extension unpacked
+- Bulk delete, export/import cấu hình (JSON)
+- Không fingerprint, không cloud, không license, không automation API.

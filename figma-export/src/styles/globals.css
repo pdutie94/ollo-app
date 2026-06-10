@@ -1,0 +1,23 @@
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(36, 43, 56, 0.8) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(36, 43, 56, 0.8);
+  border-radius: 4px;
+}
