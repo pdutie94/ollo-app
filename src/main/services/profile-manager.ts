@@ -17,6 +17,7 @@ export function createProfile(data: CreateProfileDTO): Profile {
       proxyId: data.proxyId ?? null,
       userAgent: data.userAgent ?? null,
       tags: data.tags ?? [],
+      fingerprint: data.fingerprint ?? null,  // 8.1.2
       status: 'stopped',
       createdAt: now,
       updatedAt: now
@@ -62,6 +63,7 @@ export function updateProfile(id: string, data: UpdateProfileDTO): Profile | und
     if (data.proxyId !== undefined) updateData.proxyId = data.proxyId
     if (data.userAgent !== undefined) updateData.userAgent = data.userAgent
     if (data.tags !== undefined) updateData.tags = data.tags
+    if (data.fingerprint !== undefined) updateData.fingerprint = data.fingerprint  // 8.1.2
     if (data.status !== undefined) updateData.status = data.status
 
     getDb().update(profiles).set(updateData).where(eq(profiles.id, id)).run()
@@ -154,3 +156,4 @@ export function queryProfiles(params: ProfileQueryParams): ProfileQueryResult {
 
   return { profiles: result, total }
 }
+

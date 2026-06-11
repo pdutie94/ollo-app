@@ -145,10 +145,11 @@ export function BrowserProfiles() {
     return p ? `${p.host}:${p.port}` : "—";
   };
 
-  const getFingerprintStatus = (): "Verified" | "Warning" | "Unknown" => {
-    const s = settings;
-    if (s.canvasSpoofing || s.webglSpoofing || s.audioSpoofing || s.webrtcProtection) return "Verified";
-    if (s.fontFingerprintGuard || s.autoTimezone) return "Warning";
+  const getFingerprintStatus = (profile: Profile): "Verified" | "Warning" | "Unknown" => {
+    const fp = profile.fingerprint;
+    if (!fp) return "Unknown";
+    if (fp.canvasSpoofing || fp.webglSpoofing || fp.audioSpoofing || fp.webrtcProtection) return "Verified";
+    if (fp.fontFingerprintGuard || fp.timezone) return "Warning";
     return "Unknown";
   };
 
@@ -159,7 +160,7 @@ export function BrowserProfiles() {
     groupId: p.groupId,
     proxy: getProxyHost(p.proxyId),
     browser: p.userAgent ? p.userAgent.slice(0, 30) + (p.userAgent.length > 30 ? "..." : "") : "—",
-    fingerprint: getFingerprintStatus(),
+    fingerprint: getFingerprintStatus(p),
     status: (runningProfileIds.includes(p.id) ? "running" : "stopped") as "running" | "stopped" | "error" | "pending",
     lastActive: new Date(p.updatedAt).toLocaleDateString("vi-VN"),
   }));

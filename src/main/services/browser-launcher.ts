@@ -39,7 +39,8 @@ class BrowserLauncher {
       }
 
       const userDataDir = getUserDataDir(profileId)
-      const handle = await this.runtime.launch(profileId, userDataDir, proxyConfig)
+      // 8.2.2: Pass fingerprint config to runtime
+      const handle = await this.runtime.launch(profileId, userDataDir, proxyConfig, profile.fingerprint)
       processManager.register(handle)
 
       updateProfile(profileId, { status: 'running' })
@@ -91,3 +92,4 @@ class BrowserLauncher {
 }
 
 export const browserLauncher = new BrowserLauncher()
+

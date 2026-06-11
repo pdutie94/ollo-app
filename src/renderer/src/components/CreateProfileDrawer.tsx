@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useProfileStore } from "@/store/useProfileStore";
 import { useGroupStore } from "@/store/useGroupStore";
 import { slideInRight, backdrop } from "@/lib/animations";
-import type { Profile, Group } from "@shared/types";
+import type { Profile, Group, ProfileFingerprint } from "@shared/types";
 
 interface CreateProfileDrawerProps { open: boolean; onClose: () => void }
 
@@ -38,10 +38,11 @@ function FormSelect({ label, options, value, onChange }: { label: string; option
   );
 }
 
-function ToggleSwitch({ defaultOn = false }: { defaultOn?: boolean }) {
+interface ToggleSwitchProps { defaultOn?: boolean; onChange?: (on: boolean) => void }
+function ToggleSwitch({ defaultOn = false, onChange }: ToggleSwitchProps) {
   const [on, setOn] = useState(defaultOn);
   return (
-    <button onClick={() => setOn(!on)} className="rounded-full border-none cursor-pointer relative shrink-0"
+    <button onClick={() => { const next = !on; setOn(next); onChange?.(next); }} className="rounded-full border-none cursor-pointer relative shrink-0"
       style={{ width: 32, height: 18, background: on ? "var(--primary)" : "var(--border)" }}>
       <span className="rounded-full absolute top-[3px] w-3 h-3 bg-white transition-all" style={{ left: on ? 17 : 3 }} />
     </button>
@@ -71,12 +72,38 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
   const [startupUrl, setStartupUrl] = useState("");
   const [ext, setExt] = useState("Không");
 
+  // 8.3.1: Fingerprint spoofing toggle states
+  const [fpCanvas, setFpCanvas] = useState(true)
+  const [fpWebgl, setFpWebgl] = useState(true)
+  const [fpAudio, setFpAudio] = useState(true)
+  const [fpWebrtc, setFpWebrtc] = useState(true)
+  const [fpFont, setFpFont] = useState(false)
+
   if (!open) return null;
+
+  const buildFingerprint = (): ProfileFingerprint | undefined => {
+    // Only include if at least one spoofing option is enabled or OS/timezone/lang/resolution set
+    if (!fpCanvas && !fpWebgl && !fpAudio && !fpWebrtc && !fpFont && os === 'Windows' && timezone === 'America/New_York' && language === 'vi-VN' && resolution === '1920×1080') {
+      return undefined
+    }
+    return {
+      os: os as 'Windows' | 'macOS' | 'Linux',
+      timezone,
+      language,
+      resolution,
+      canvasSpoofing: fpCanvas,
+      webglSpoofing: fpWebgl,
+      audioSpoofing: fpAudio,
+      webrtcProtection: fpWebrtc,
+      fontFingerprintGuard: fpFont
+    }
+  }
 
   const handleCreate = async () => {
     if (!name.trim()) { toast.error("Vui lòng nhập tên profile"); return; }
     const groupId = group !== "Chưa phân loại" ? groups.find((g: Group) => g.name === group)?.id : undefined;
-    const res = await window.api.profileCreate({ name: name.trim(), notes: notes.trim() || undefined, groupId });
+    const fingerprint = buildFingerprint()
+    const res = await window.api.profileCreate({ name: name.trim(), notes: notes.trim() || undefined, groupId, fingerprint });
     if (res.success && res.data) { addProfile(res.data as Profile); toast.success("Đã tạo profile"); onClose(); }
     else { toast.error(res.error ?? "Tạo profile thất bại"); }
   };
@@ -146,12 +173,26 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
               <FormSelect label="Độ phân giải" value={resolution} onChange={setResolution} options={["1920×1080", "2560×1440", "1366×768", "1280×800"]} />
               <div className="rounded-lg p-4 bg-[var(--accent)] border border-[var(--border)]">
                 <p className="text-xs font-semibold text-[var(--foreground)] mb-3">Spoofing</p>
-                {["Canvas Fingerprint", "WebGL Fingerprint", "Audio Context", "WebRTC Leak"].map((item) => (
-                  <div key={item} className="flex items-center justify-between py-2 border-b border-[rgba(36,43,56,0.8)]">
-                    <span className="text-xs text-[var(--muted-foreground)]">{item}</span>
-                    <ToggleSwitch defaultOn />
-                  </div>
-                ))}
+                <div className="flex items-center justify-between py-2 border-b border-[rgba(36,43,56,0.8)]">
+                  <span className="text-xs text-[var(--muted-foreground)]">Canvas Fingerprint</span>
+                  <ToggleSwitch defaultOn={fpCanvas} onChange={setFpCanvas} />
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-[rgba(36,43,56,0.8)]">
+                  <span className="text-xs text-[var(--muted-foreground)]">WebGL Fingerprint</span>
+                  <ToggleSwitch defaultOn={fpWebgl} onChange={setFpWebgl} />
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-[rgba(36,43,56,0.8)]">
+                  <span className="text-xs text-[var(--muted-foreground)]">Audio Context</span>
+                  <ToggleSwitch defaultOn={fpAudio} onChange={setFpAudio} />
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-[rgba(36,43,56,0.8)]">
+                  <span className="text-xs text-[var(--muted-foreground)]">WebRTC Leak</span>
+                  <ToggleSwitch defaultOn={fpWebrtc} onChange={setFpWebrtc} />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-xs text-[var(--muted-foreground)]">Font Fingerprint Guard</span>
+                  <ToggleSwitch defaultOn={fpFont} onChange={setFpFont} />
+                </div>
               </div>
             </>
           )}

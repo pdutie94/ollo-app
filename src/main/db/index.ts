@@ -24,6 +24,18 @@ export function initDatabase(): ReturnType<typeof drizzle<typeof schema>> {
       "SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name IN ('profiles','proxies','groups','settings')"
     ).get() as { cnt: number }
 
+    // 8.1.2: Check if fingerprint column exists; add if missing
+    const fpColumnCheck = sqlite.prepare(
+      "SELECT COUNT(*) as cnt FROM pragma_table_info('profiles') WHERE name='fingerprint'"
+    ).get() as { cnt: number }
+    if (fpColumnCheck.cnt === 0) {
+      try {
+        sqlite.exec("ALTER TABLE profiles ADD COLUMN fingerprint text DEFAULT '{}'")
+      } catch (e) {
+        console.error('Failed to add fingerprint column:', e)
+      }
+    }
+
     if (tableCount.cnt < 4) {
       const migrationPath = join(app.getAppPath(), '..', '..', 'drizzle', '0000_warm_mystique.sql')
       // Try alternate paths (dev vs prod)
@@ -57,6 +69,7 @@ export function initDatabase(): ReturnType<typeof drizzle<typeof schema>> {
             proxy_id text,
             user_agent text,
             tags text DEFAULT '[]',
+            fingerprint text DEFAULT '{}',
             status text DEFAULT 'stopped' NOT NULL,
             created_at integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
             updated_at integer DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -103,3 +116,4 @@ export function getDb(): NonNullable<typeof db> {
   }
   return db
 }
+

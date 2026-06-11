@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
-import type { UserSettings } from '@shared/types'
+import type { UserSettings, ProfileFingerprint } from '@shared/types'
 
 export const profiles = sqliteTable('profiles', {
   id: text('id').primaryKey(),
@@ -10,6 +10,7 @@ export const profiles = sqliteTable('profiles', {
   proxyId: text('proxy_id'),
   userAgent: text('user_agent'),
   tags: text('tags', { mode: 'json' }).$type<string[]>().default(sql`'[]'`),
+  fingerprint: text('fingerprint', { mode: 'json' }).$type<ProfileFingerprint | null>().default(sql`'{}'`),  // 8.1.2
   status: text('status').notNull().default('stopped'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`)
@@ -41,3 +42,4 @@ export const settings = sqliteTable('settings', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`)
 })
+
