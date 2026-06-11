@@ -1,16 +1,6 @@
-Phase 7: Remove Mock Data — real dashboard, real sidebar/header, real batch ops
+Fix: auto-detect process exit — update DB & event history when Chrome closed manually
 
-- Add event-history service recording profile lifecycle events
-- Wire event recording into browser-launcher (start/stop/error)
-- Add IPC handlers: event:history, event:chart, error:count
-- Replace mock chartData with real time-series from event-history
-- Replace hardcoded error count 0 with live errorCount from errorLogger
-- Replace toast-based activity feed with real event history feed
-- Replace Sidebar hardcoded user "Alex Kim" with settings-based userName/userPlan
-- Replace Header hardcoded initials "AK" with computed initials
-- Replace static Header notifications with live browser-event-driven notifications
-- Replace always-"Verified" fingerprint with computed status based on settings
-- Add userName/userPlan to UserSettings type
-- Fix launchSelected/stopSelected to track and report per-profile success/failure
+- process-manager onClose now calls updateProfile(status:stopped) + recordEvent
+- Previously only emitted event but never updated DB, causing stuck "running" state
 
 Co-authored-by: CommandCodeBot <noreply@commandcode.ai>

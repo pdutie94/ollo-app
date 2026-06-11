@@ -1,5 +1,7 @@
 import type { RuntimeHandle } from './browser-runtime'
 import { eventBus } from '../core/events/event-bus'
+import { updateProfile } from './profile-manager'
+import { recordEvent } from './event-history'
 
 class ProcessManager {
   private activeHandles = new Map<string, RuntimeHandle>()
@@ -11,6 +13,11 @@ class ProcessManager {
     handle.onClose(() => {
       if (this.activeHandles.has(profileId)) {
         this.activeHandles.delete(profileId)
+        updateProfile(profileId, { status: 'stopped' })
+        recordEvent({
+          type: 'profile:stopped',
+          profileId
+        })
         eventBus.emit('profile:stopped', {
           profileId,
           timestamp: new Date().toISOString()
