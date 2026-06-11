@@ -32,13 +32,13 @@ export function Sidebar() {
         <div className="flex items-center justify-center rounded-lg w-7 h-7 bg-[var(--primary)]">
           <Zap size={15} color="#fff" fill="#fff" />
         </div>
-        <span className="text-[var(--foreground)] font-inter text-[15px] font-semibold tracking-tight">
+        <span className="text-[var(--foreground)] text-[15px] font-medium tracking-tight">
           Ollo
         </span>
       </div>
 
       <nav className="flex flex-col gap-0.5 px-3 pt-4 flex-1">
-        <p className="px-2 mb-2 text-[var(--muted-foreground)] text-[10px] font-semibold tracking-widest uppercase font-inter">
+        <p className="px-2 mb-2 text-[var(--muted-foreground)] text-[10px] font-medium tracking-widest uppercase">
           Điều hướng
         </p>
         <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col gap-0.5">
@@ -53,7 +53,7 @@ export function Sidebar() {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setActiveView(item.id)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full text-left transition-colors
-                  text-[13px] border-none cursor-pointer relative font-inter
+                  text-sm border-none cursor-pointer relative
                   ${isActive
                     ? "bg-[rgba(79,124,255,0.15)] text-[var(--primary)] font-medium"
                     : "bg-transparent text-[var(--sidebar-foreground)] font-normal hover:bg-[var(--accent)] hover:text-[var(--foreground)]"
@@ -75,16 +75,16 @@ export function Sidebar() {
 
       <div className="px-3 py-4 border-t border-[var(--sidebar-border)]">
         <div className="flex items-center gap-3 px-2">
-          <div className="rounded-full flex items-center justify-center shrink-0 w-[30px] h-[30px] text-xs font-semibold text-[var(--foreground)] font-inter"
+          <div className="rounded-full flex items-center justify-center shrink-0 w-[30px] h-[30px] text-xs font-medium text-[var(--foreground)]"
             style={{ background: "linear-gradient(135deg, #4F7CFF 0%, #8B5CF6 100%)" }}
           >
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[var(--foreground)] text-[13px] font-medium font-inter leading-tight">
+            <p className="text-[var(--foreground)] text-sm font-medium leading-tight">
               {userName}
             </p>
-            <p className="text-[var(--muted-foreground)] text-xs font-inter leading-tight">
+            <p className="text-[var(--muted-foreground)] text-xs leading-tight">
               {userPlan}
             </p>
           </div>

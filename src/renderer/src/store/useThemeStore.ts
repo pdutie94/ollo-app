@@ -1,16 +1,10 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 
-export type ThemePreference = 'system' | 'light' | 'dark'
+export type ThemePreference = 'light' | 'dark'
 type ResolvedTheme = 'light' | 'dark'
 
-function getSystemTheme(): ResolvedTheme {
-  if (typeof window === 'undefined') return 'dark'
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
 function resolveTheme(pref: ThemePreference): ResolvedTheme {
-  if (pref === 'system') return getSystemTheme()
   return pref
 }
 
@@ -33,11 +27,11 @@ const STORAGE_KEY = 'ollo-theme-preference'
 function loadPreference(): ThemePreference {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 'light' || saved === 'dark' || saved === 'system') return saved
+    if (saved === 'light' || saved === 'dark') return saved
   } catch {
     // localStorage unavailable
   }
-  return 'system'
+  return 'dark'
 }
 
 function savePreference(pref: ThemePreference): void {
@@ -55,30 +49,16 @@ const initialResolved = resolveTheme(initialPreference)
 applyTheme(initialResolved)
 
 export const useThemeStore = create<ThemeStore>()(
-  immer((set) => {
-    // Listen for system theme changes
-    if (typeof window !== 'undefined') {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        set((state) => {
-          if (state.preference === 'system') {
-            state.resolved = getSystemTheme()
-            applyTheme(state.resolved)
-          }
-        })
+  immer((set) => ({
+    preference: initialPreference,
+    resolved: initialResolved,
+
+    setPreference: (pref) =>
+      set((state) => {
+        state.preference = pref
+        state.resolved = resolveTheme(pref)
+        savePreference(pref)
+        applyTheme(state.resolved)
       })
-    }
-
-    return {
-      preference: initialPreference,
-      resolved: initialResolved,
-
-      setPreference: (pref) =>
-        set((state) => {
-          state.preference = pref
-          state.resolved = resolveTheme(pref)
-          savePreference(pref)
-          applyTheme(state.resolved)
-        })
-    }
-  })
+  }))
 )

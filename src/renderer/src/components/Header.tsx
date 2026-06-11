@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Search, X, AlertCircle, Info, Check, Sun, Moon, Monitor, Settings, User, LogOut } from "lucide-react";
+import { Bell, Search, X, AlertCircle, Info, Check, Sun, Moon, Settings, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useThemeStore, type ThemePreference } from "@/store/useThemeStore";
 import { useUIStore } from "@/store/useUIStore";
@@ -12,7 +12,6 @@ const notifIcons: Record<string, React.ElementType> = { error: AlertCircle, succ
 const themeOptions: { value: ThemePreference; icon: typeof Sun; label: string }[] = [
   { value: "light", icon: Sun, label: "Sáng" },
   { value: "dark", icon: Moon, label: "Tối" },
-  { value: "system", icon: Monitor, label: "Hệ thống" },
 ];
 
 interface Notification {
@@ -75,9 +74,9 @@ export function Header() {
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearchKeyDown}
             placeholder="Tìm profile, proxy..."
-            className="bg-transparent border-none outline-none text-xs w-full font-inter"
+            className="bg-transparent border-none outline-none text-xs w-full"
             style={{ color: search ? "#fff" : "var(--muted-foreground)" }} />
-          <kbd className="bg-[var(--accent)] border border-[var(--border)] rounded px-1.5 py-0.5 text-[10px] text-[var(--muted-foreground)] font-inter shrink-0">⌘K</kbd>
+          <kbd className="bg-[var(--accent)] border border-[var(--border)] rounded px-1.5 py-0.5 text-[10px] text-[var(--muted-foreground)] shrink-0">⌘K</kbd>
         </div>
       </div>
 
@@ -98,7 +97,7 @@ export function Header() {
               style={{ top: "100%", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}>
               <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                 <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-semibold text-[var(--foreground)]">Thông báo</span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">Thông báo</span>
                   {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-[var(--foreground)]"
                     style={{ background: "var(--destructive)" }}>{unreadCount}</span>}
                 </div>
@@ -117,7 +116,7 @@ export function Header() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-semibold text-[var(--foreground)]">{n.title}</p>
+                          <p className="text-xs font-medium text-[var(--foreground)]">{n.title}</p>
                           {n.unread && <span className="rounded-full w-[5px] h-[5px] bg-[var(--primary)] shrink-0" />}
                         </div>
                         <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{n.body}</p>
@@ -136,7 +135,7 @@ export function Header() {
 
         <div className="relative" ref={avatarRef}>
           <button onClick={() => setAvatarOpen(!avatarOpen)}
-            className="rounded-full flex items-center justify-center cursor-pointer w-[30px] h-[30px] text-xs font-semibold text-[var(--foreground)] border-none"
+            className="rounded-full flex items-center justify-center cursor-pointer w-[30px] h-[30px] text-xs font-medium text-[var(--foreground)] border-none"
             style={{ background: avatarOpen ? "linear-gradient(135deg, #6F9CFF 0%, #A87DFF 100%)" : "linear-gradient(135deg, #4F7CFF 0%, #8B5CF6 100%)" }}>
             {initials}
           </button>
@@ -146,7 +145,7 @@ export function Header() {
                 className="absolute right-0 z-50 rounded-xl mt-2 w-[220px] bg-[var(--popover)] border border-[var(--border)] shadow-xl py-1.5"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
                 <div className="px-4 py-2 border-b border-[var(--border)]">
-                  <p className="text-sm font-semibold text-[var(--foreground)]">{userName}</p>
+                  <p className="text-sm font-medium text-[var(--foreground)]">{userName}</p>
                   <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Gói Pro</p>
                 </div>
                 <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">
@@ -173,17 +172,17 @@ export function Header() {
                 </div>
                 <div className="pt-0.5">
                   <button onClick={() => { setActiveView("settings"); setAvatarOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-1.5 text-[13px] border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
+                    className="w-full flex items-center gap-3 px-4 py-1.5 text-sm border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
                     style={{ color: "var(--muted-foreground)" }}>
                     <Settings size={14} /> Cài đặt
                   </button>
                   <button onClick={() => { setActiveView("settings"); setAvatarOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-1.5 text-[13px] border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
+                    className="w-full flex items-center gap-3 px-4 py-1.5 text-sm border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
                     style={{ color: "var(--muted-foreground)" }}>
                     <User size={14} /> Hồ sơ
                   </button>
                   <button onClick={() => { setActiveView("settings"); setAvatarOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-1.5 text-[13px] border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
+                    className="w-full flex items-center gap-3 px-4 py-1.5 text-sm border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
                     style={{ color: "var(--muted-foreground)" }}>
                     <LogOut size={14} /> Thoát
                   </button>

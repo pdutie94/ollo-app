@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Upload, Download, RefreshCw, Wifi, MoreHorizontal, X, ChevronDown } from "lucide-react";
+import { Plus, Upload, Download, RefreshCw, Wifi, MoreHorizontal, X } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Select } from "@/components/ui/Select";
 import { useProxyStore } from "@/store/useProxyStore";
 import type { Proxy, CreateProxyDTO, ProxyTestResult } from "@shared/types";
 
@@ -30,7 +32,7 @@ function getFlagEmoji(country: string): string {
 function AddProxyDrawer({ onClose, editProxy }: { onClose: () => void; editProxy?: Proxy }) {
   const addProxy = useProxyStore((s) => s.addProxy);
   const updateProxy = useProxyStore((s) => s.updateProxy);
-  const [host, setHost] = useState(editProxy?.host ?? ""); const [port, setPort] = useState(String(editProxy?.port ?? "8080")); const [type, setType] = useState<"HTTP" | "HTTPS" | "SOCKS5">((editProxy?.type.toUpperCase() ?? "HTTP") as "HTTP" | "HTTPS" | "SOCKS5"); const [country, setCountry] = useState(countries[0]);
+  const [host, setHost] = useState(editProxy?.host ?? ""); const [port, setPort] = useState(String(editProxy?.port ?? "8080")); const [type, setType] = useState<"HTTP" | "HTTPS" | "SOCKS5">((editProxy?.type.toUpperCase() ?? "HTTP") as "HTTP" | "HTTPS" | "SOCKS5"); const [country, setCountry] = useState(countries[0]); const countryOptions = countries.map((c) => `${c.flag} ${c.name}`);
   const [testing, setTesting] = useState(false); const [testResult, setTestResult] = useState<null | { ok: boolean; ms: number }>(null);
 
   const handleTest = async () => {
@@ -84,13 +86,13 @@ function AddProxyDrawer({ onClose, editProxy }: { onClose: () => void; editProxy
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
       <div className="fixed top-0 right-0 h-full z-50 flex flex-col w-[480px] bg-[var(--card)] border-l border-[var(--border)]">
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[var(--border)]">
-          <div><h2 className="text-base font-semibold text-[var(--foreground)]">{editProxy ? "Sửa Proxy" : "Thêm Proxy"}</h2><p className="text-xs text-[var(--muted-foreground)] mt-0.5">{editProxy ? "Cập nhật kết nối proxy" : "Cấu hình kết nối proxy mới"}</p></div>
+          <div><h2 className="text-base font-medium text-[var(--foreground)]">{editProxy ? "Sửa Proxy" : "Thêm Proxy"}</h2><p className="text-xs text-[var(--muted-foreground)] mt-0.5">{editProxy ? "Cập nhật kết nối proxy" : "Cấu hình kết nối proxy mới"}</p></div>
           <button onClick={onClose} className="rounded-lg p-1.5 bg-transparent border-none cursor-pointer text-[var(--muted-foreground)]"><X size={18} /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <div className="flex gap-2 mb-4">
             {(["HTTP", "HTTPS", "SOCKS5"] as const).map((t) => (
-              <button key={t} onClick={() => setType(t)} className="flex-1 py-2 rounded-lg text-[13px] font-medium cursor-pointer"
+              <button key={t} onClick={() => setType(t)} className="flex-1 py-2 rounded-lg text-sm font-medium cursor-pointer"
                 style={{ background: type === t ? "rgba(79,124,255,0.15)" : "var(--accent)", border: type === t ? "1px solid var(--primary)" : "1px solid var(--border)", color: type === t ? "var(--primary)" : "var(--muted-foreground)" }}>{t}</button>
             ))}
           </div>
@@ -98,24 +100,21 @@ function AddProxyDrawer({ onClose, editProxy }: { onClose: () => void; editProxy
             <div className="flex-1">
               <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-1.5">Host / IP</label>
               <input value={host} onChange={(e) => setHost(e.target.value)} placeholder="proxy.example.com"
-                className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-[13px] font-inter outline-none" />
+                className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-sm outline-none" />
             </div>
             <div className="w-[90px]">
               <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-1.5">Cổng</label>
               <input value={port} onChange={(e) => setPort(e.target.value)} placeholder="8080"
-                className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-[13px] font-inter outline-none" />
+                className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-sm outline-none" />
             </div>
           </div>
           <div className="mb-3">
             <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-1.5">Quốc gia</label>
-            <div className="relative">
-              <select value={country.name} onChange={(e) => setCountry(countries.find((c) => c.name === e.target.value) || countries[0])}
-                className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg text-[var(--foreground)] text-[13px] outline-none appearance-none cursor-pointer"
-                style={{ padding: "8px 32px 8px 12px" }}>
-                {countries.map((c) => <option key={c.name} value={c.name} className="bg-\[var\(--popover\)\]">{c.flag} {c.name}</option>)}
-              </select>
-              <ChevronDown size={13} color="var(--muted-foreground)" className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <Select
+              value={`${country.flag} ${country.name}`}
+              onChange={(v) => setCountry(countries.find((c) => `${c.flag} ${c.name}` === v) || countries[0])}
+              options={countryOptions}
+            />
           </div>
           {testResult && (
             <div className="rounded-lg px-3 py-2.5 flex items-center gap-2 mb-3"
@@ -125,14 +124,14 @@ function AddProxyDrawer({ onClose, editProxy }: { onClose: () => void; editProxy
             </div>
           )}
           <button onClick={handleTest} disabled={testing}
-            className="w-full flex items-center justify-center gap-2 rounded-lg px-3 py-2 bg-[var(--accent)] border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] font-medium cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 rounded-lg px-3 py-2 bg-[var(--accent)] border border-[var(--border)] text-[var(--muted-foreground)] text-sm font-medium cursor-pointer"
             style={{ cursor: testing ? "wait" : "pointer" }}>
             <RefreshCw size={14} style={{ animation: testing ? "spin 1s linear infinite" : "none" }} /> {testing ? "Đang kiểm tra..." : "Kiểm tra kết nối"}
           </button>
         </div>
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
-          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] cursor-pointer">Huỷ</button>
-          <button onClick={handleSubmit} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">{editProxy ? "Lưu thay đổi" : "Thêm Proxy"}</button>
+          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-sm cursor-pointer">Huỷ</button>
+          <button onClick={handleSubmit} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-sm font-medium cursor-pointer">{editProxy ? "Lưu thay đổi" : "Thêm Proxy"}</button>
         </div>
       </div>
     </>
@@ -208,19 +207,19 @@ export function ProxyManagement() {
   };
 
   return (
-    <div className="flex flex-col h-full font-inter" onClick={() => setActiveMenu(null)}>
+    <div className="flex flex-col h-full" onClick={() => setActiveMenu(null)}>
       <div className="px-6 pt-5 pb-0 shrink-0 border-b border-[var(--border)]">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-[22px] font-semibold text-[var(--foreground)]">Proxy</h1>
-            <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">{proxies.length} proxy</p>
+            <h1 className="text-[22px] font-medium text-[var(--foreground)]">Proxy</h1>
+            <p className="text-sm text-[var(--muted-foreground)] mt-0.5">{proxies.length} proxy</p>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => { proxies.forEach((p) => testProxy(p.id)); }}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] font-medium cursor-pointer">
+              className="flex items-center gap-2 rounded-lg px-3 py-2 bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)] text-sm font-medium cursor-pointer">
               <RefreshCw size={14} /> Kiểm tra tất cả
             </button>
-            <button onClick={() => setAddDrawer(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-[13px] font-medium cursor-pointer">
+            <button onClick={() => setAddDrawer(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-sm font-medium cursor-pointer">
               <Plus size={15} /> Thêm Proxy
             </button>
           </div>
@@ -245,9 +244,9 @@ export function ProxyManagement() {
         ) : (
         <table className="w-full border-collapse">
           <thead><tr className="bg-[var(--card)]">
-            <th className="w-10 px-4 py-2.5 text-center border-b border-[var(--border)]"><input type="checkbox" className="accent-[var(--primary)]" /></th>
+            <th className="w-10 px-4 py-2.5 text-center border-b border-[var(--border)]"><Checkbox checked={false} className="mx-auto" /></th>
             {["Host", "Cổng", "Loại", "Quốc gia", "Trạng thái", "Độ trễ", ""].map((col) => (
-              <th key={col} className="px-3 py-2.5 text-left text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase border-b border-[var(--border)]">{col}</th>
+              <th key={col} className="px-3 py-2.5 text-left text-xs font-medium text-[var(--muted-foreground)] tracking-wider uppercase border-b border-[var(--border)]">{col}</th>
             ))}
           </tr></thead>
           <tbody>
@@ -255,20 +254,20 @@ export function ProxyManagement() {
               const row = getDisplayRow(proxy);
               return (
               <tr key={proxy.id} className="border-b border-[var(--border)] hover:bg-white/[0.02]">
-                <td className="px-4 py-2.5 text-center"><input type="checkbox" className="accent-[var(--primary)]" /></td>
+                <td className="px-4 py-2.5 text-center"><Checkbox checked={false} className="mx-auto" /></td>
                 <td className="px-3 py-2.5">
                   <div className="flex items-center gap-2">
                     <Wifi size={13} color={row.status === "running" ? "#22C55E" : row.status === "error" ? "#EF4444" : "#6B7280"} />
-                    <span className="text-xs font-inter text-[var(--foreground)]">{proxy.host}</span>
+                    <span className="text-xs text-[var(--foreground)]">{proxy.host}</span>
                   </div>
                 </td>
-                <td className="px-3 py-2.5 text-xs font-inter text-[var(--muted-foreground)]">{proxy.port}</td>
+                <td className="px-3 py-2.5 text-xs text-[var(--muted-foreground)]">{proxy.port}</td>
                 <td className="px-3 py-2.5"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs text-[var(--muted-foreground)]" style={{ background: "var(--accent)" }}>{proxy.type.toUpperCase()}</span></td>
                 <td className="px-3 py-2.5 text-xs text-[var(--muted-foreground)]">{row.flag ? `${row.flag} ${row.country}` : row.country}</td>
                 <td className="px-3 py-2.5">{testing.has(proxy.id) ? <span className="text-xs text-[var(--primary)]">Đang kiểm tra...</span> : <StatusBadge status={row.status} />}</td>
                 <td className="px-3 py-2.5">
                   {testing.has(proxy.id) ? <span className="text-xs text-[var(--muted-foreground)]">—</span> : row.latency !== null
-                    ? <span className="text-xs font-semibold" style={{ color: latencyColor(row.latency) }}>{row.latency}ms</span>
+                    ? <span className="text-xs font-medium" style={{ color: latencyColor(row.latency) }}>{row.latency}ms</span>
                     : <span className="text-xs text-[#6B7280]">—</span>}
                 </td>
                 <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>

@@ -38,14 +38,14 @@ function GroupFormDrawer({ onClose, editGroup }: { onClose: () => void; editGrou
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
       <div className="fixed top-0 right-0 h-full z-50 flex flex-col w-[420px] bg-[var(--card)] border-l border-[var(--border)]">
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[var(--border)]">
-          <div><h2 className="text-base font-semibold text-[var(--foreground)]">{editGroup ? "Sửa nhóm" : "Nhóm mới"}</h2></div>
+          <div><h2 className="text-base font-medium text-[var(--foreground)]">{editGroup ? "Sửa nhóm" : "Nhóm mới"}</h2></div>
           <button onClick={onClose} className="rounded-lg p-1.5 bg-transparent border-none cursor-pointer text-[var(--muted-foreground)]"><X size={18} /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           <div>
             <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-1.5">Tên nhóm</label>
             <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Marketing" onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-[13px] outline-none" />
+              className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-sm outline-none" />
           </div>
 
           <div>
@@ -95,8 +95,8 @@ function GroupFormDrawer({ onClose, editGroup }: { onClose: () => void; editGrou
           </div>
         </div>
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
-          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] cursor-pointer">Huỷ</button>
-          <button onClick={handleSubmit} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">
+          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-sm cursor-pointer">Huỷ</button>
+          <button onClick={handleSubmit} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-sm font-medium cursor-pointer">
             {editGroup ? "Lưu thay đổi" : "Tạo nhóm"}
           </button>
         </div>
@@ -136,14 +136,14 @@ export function ProfileGroups() {
   const runningProfiles = runningProfileIds.length;
 
   return (
-    <div className="flex flex-col h-full font-inter">
+    <div className="flex flex-col h-full">
       <div className="px-6 pt-5 pb-4 shrink-0 border-b border-[var(--border)]">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-semibold text-[var(--foreground)]">Nhóm Profile</h1>
-            <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">{groups.length} nhóm · {totalProfiles} profile · {runningProfiles} đang chạy</p>
+            <h1 className="text-[22px] font-medium text-[var(--foreground)]">Nhóm Profile</h1>
+            <p className="text-sm text-[var(--muted-foreground)] mt-0.5">{groups.length} nhóm · {totalProfiles} profile · {runningProfiles} đang chạy</p>
           </div>
-          <button onClick={() => { setEditGroup(undefined); setDrawerOpen(true); }} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-[13px] font-medium cursor-pointer">
+          <button onClick={() => { setEditGroup(undefined); setDrawerOpen(true); }} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-sm font-medium cursor-pointer">
             <Plus size={15} /> Nhóm mới
           </button>
         </div>
@@ -169,7 +169,7 @@ export function ProfileGroups() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-semibold text-[var(--foreground)] truncate leading-tight">{group.name}</span>
+                      <span className="text-sm font-medium text-[var(--foreground)] truncate leading-tight">{group.name}</span>
                       <div className="relative shrink-0 ml-2">
                         <button className="bg-transparent border-none cursor-pointer p-0 leading-none" onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === group.id ? null : group.id); }}>
                           <MoreHorizontal size={14} color="var(--muted-foreground)" />

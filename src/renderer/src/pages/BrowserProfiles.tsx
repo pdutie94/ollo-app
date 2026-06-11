@@ -6,6 +6,8 @@ import {
   ChevronRight, X, AlertTriangle,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Select } from "@/components/ui/Select";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { CreateProfileDrawer } from "@/components/CreateProfileDrawer";
 import { EditProfileDrawer } from "@/components/EditProfileDrawer";
 import { useProfileStore } from "@/store/useProfileStore";
@@ -25,10 +27,10 @@ function DeleteConfirmDrawer({ count, onConfirm, onCancel }: { count: number; on
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onCancel} />
-      <div className="fixed top-0 right-0 h-full z-50 flex flex-col w-[480px] bg-[var(--card)] border-l border-[var(--border)] font-inter">
+      <div className="fixed top-0 right-0 h-full z-50 flex flex-col w-[480px] bg-[var(--card)] border-l border-[var(--border)]">
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[var(--border)]">
           <div>
-            <h2 className="text-base font-semibold text-[var(--foreground)]">Xoá {count} profile?</h2>
+            <h2 className="text-base font-medium text-[var(--foreground)]">Xoá {count} profile?</h2>
             <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Hành động này không thể hoàn tác</p>
           </div>
           <button onClick={onCancel} className="rounded-lg p-1.5 bg-transparent border-none cursor-pointer text-[var(--muted-foreground)]"><X size={18} /></button>
@@ -40,8 +42,8 @@ function DeleteConfirmDrawer({ count, onConfirm, onCancel }: { count: number; on
           </div>
         </div>
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
-          <button onClick={onCancel} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] font-medium cursor-pointer">Huỷ</button>
-          <button onClick={onConfirm} className="rounded-lg px-4 py-2 bg-[#EF4444] border-none text-[var(--destructive-foreground)] text-[13px] font-medium cursor-pointer">Xoá {count} profile</button>
+          <button onClick={onCancel} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-sm font-medium cursor-pointer">Huỷ</button>
+          <button onClick={onConfirm} className="rounded-lg px-4 py-2 bg-[#EF4444] border-none text-[var(--destructive-foreground)] text-sm font-medium cursor-pointer">Xoá {count} profile</button>
         </div>
       </div>
     </>
@@ -70,9 +72,9 @@ function ImportDrawer({ onClose }: { onClose: () => void }) {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
-      <div className="fixed top-0 right-0 h-full z-50 flex flex-col w-[480px] bg-[var(--card)] border-l border-[var(--border)] font-inter">
+      <div className="fixed top-0 right-0 h-full z-50 flex flex-col w-[480px] bg-[var(--card)] border-l border-[var(--border)]">
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[var(--border)]">
-          <h2 className="text-base font-semibold text-[var(--foreground)]">Import Profile</h2>
+          <h2 className="text-base font-medium text-[var(--foreground)]">Import Profile</h2>
           <button onClick={onClose} className="rounded-lg p-1.5 bg-transparent border-none cursor-pointer text-[var(--muted-foreground)]"><X size={18} /></button>
         </div>
         <div className="flex-1 px-6 py-5">
@@ -80,14 +82,14 @@ function ImportDrawer({ onClose }: { onClose: () => void }) {
             style={{ border: `2px dashed ${dragging ? "var(--primary)" : "var(--border)"}`, background: dragging ? "rgba(79,124,255,0.06)" : "var(--accent)" }}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(e) => { e.preventDefault(); setDragging(false); handleImport(); }} onClick={handleImport}>
             <Upload size={28} color={dragging ? "var(--primary)" : "var(--muted-foreground)"} />
-            <p className="text-[13px] font-medium" style={{ color: dragging ? "var(--primary)" : "#fff" }}>Thả CSV hoặc JSON vào đây</p>
+            <p className="text-sm font-medium" style={{ color: dragging ? "var(--primary)" : "#fff" }}>Thả CSV hoặc JSON vào đây</p>
             <p className="text-xs text-[var(--muted-foreground)]">hoặc click để chọn file</p>
           </div>
           <p className="text-xs text-[var(--muted-foreground)] mt-4">Hỗ trợ CSV, JSON · Tối đa 10.000 profile mỗi lần</p>
         </div>
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
-          <button onClick={onClose} disabled={importing} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] cursor-pointer">Huỷ</button>
-          <button onClick={handleImport} disabled={importing} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">{importing ? "Đang import..." : "Chọn File"}</button>
+          <button onClick={onClose} disabled={importing} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-sm cursor-pointer">Huỷ</button>
+          <button onClick={handleImport} disabled={importing} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-sm font-medium cursor-pointer">{importing ? "Đang import..." : "Chọn File"}</button>
         </div>
       </div>
     </>
@@ -230,22 +232,23 @@ export function BrowserProfiles() {
   if (paginated.length === 0) {
     tableBodyContent = <tr><td colSpan={9} className="py-12 text-center"><p className="text-sm text-[var(--muted-foreground)]">Không tìm thấy profile</p></td></tr>;
   } else {
-    tableBodyContent = paginated.map((profile, i) => {
+    tableBodyContent = paginated.map((profile) => {
       const isSelected = selected.has(profile.id);
       const running = profile.status === "running";
       const fp = fingerprintColors[profile.fingerprint] || fingerprintColors.Unknown;
-      const rowBg = isSelected ? "rgba(79,124,255,0.06)" : i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)";
       return (
-        <tr key={profile.id} className="border-b border-[var(--border)]" style={{ background: rowBg }}>
-          <td className="sticky left-0 z-[1] px-4 py-2.5 text-center" style={{ background: isSelected ? "var(--card)" : "var(--background)" }}><input type="checkbox" checked={isSelected} onChange={() => toggleSelect(profile.id)} className="accent-[var(--primary)] cursor-pointer" /></td>
-          <td className="sticky left-[45px] z-[1] px-3 py-2.5" style={{ background: isSelected ? "var(--card)" : "var(--background)" }}><span className="text-[13px] font-medium text-[var(--foreground)] font-inter">{profile.name}</span></td>
+        <tr key={profile.id} className="border-b border-[var(--border)]">
+          <td className="sticky left-0 z-[1] px-4 py-2.5 text-center bg-[var(--background)]">
+              <Checkbox checked={isSelected} onChange={() => toggleSelect(profile.id)} />
+            </td>
+          <td className="sticky left-12 z-[1] px-3 py-2.5 bg-[var(--background)]"><span className="text-sm font-normal text-[var(--foreground)]">{profile.name}</span></td>
           <td className="px-3 py-2.5"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs whitespace-nowrap" style={{ background: getGroupColor(profile.groupId), color: groups.find((g) => g.id === profile.groupId)?.color ?? "var(--muted-foreground)" }}>{profile.group}</span></td>
           <td className="px-3 py-2.5 text-xs text-[var(--muted-foreground)]">{profile.proxy}</td>
           <td className="px-3 py-2.5 text-xs text-[var(--muted-foreground)]">{profile.browser}</td>
           <td className="px-3 py-2.5"><span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" style={{ background: fp.bg, color: fp.text }}>{fp.label}</span></td>
           <td className="px-3 py-2.5"><StatusBadge status={profile.status} /></td>
           <td className="px-3 py-2.5 text-xs text-[var(--muted-foreground)]">{profile.lastActive}</td>
-          <td className="sticky right-0 z-[1] px-3 py-2.5" style={{ background: isSelected ? "var(--card)" : "var(--background)" }} onClick={(e) => e.stopPropagation()}>
+          <td className="sticky right-0 z-[1] px-3 py-2.5 bg-[var(--background)]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-1">
               <button className="rounded p-1.5 bg-transparent border-none cursor-pointer"
                 onClick={() => running ? stopSingle(profile.id) : launchSingle(profile.id)}>
@@ -275,14 +278,14 @@ export function BrowserProfiles() {
   }
 
   return (
-    <div className="flex flex-col h-full font-inter" onClick={() => setActiveMenu(null)}>
+    <div className="flex flex-col h-full" onClick={() => setActiveMenu(null)}>
       <div className="px-6 pt-5 pb-0 shrink-0 border-b border-[var(--border)]">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-[22px] font-semibold text-[var(--foreground)]">Profile</h1>
-            <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">{displayProfiles.length} tổng · {displayProfiles.filter((p) => p.status === "running").length} đang chạy</p>
+            <h1 className="text-[22px] font-medium text-[var(--foreground)]">Profile</h1>
+            <p className="text-sm text-[var(--muted-foreground)] mt-0.5">{displayProfiles.length} tổng · {displayProfiles.filter((p) => p.status === "running").length} đang chạy</p>
           </div>
-          <button onClick={() => setDrawerOpen(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-[13px] font-medium cursor-pointer">
+          <button onClick={() => setDrawerOpen(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-sm font-medium cursor-pointer">
             <Plus size={15} /> Tạo Profile
           </button>
         </div>
@@ -297,16 +300,16 @@ export function BrowserProfiles() {
           <ToolbarBtn icon={Download} label="Export" onClick={handleExport} />
           <div className="flex items-center gap-2 ml-auto rounded-lg px-3 py-1.5 bg-[var(--card)] border border-[var(--border)] min-w-[220px]">
             <Search size={13} color="var(--muted-foreground)" />
-            <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Lọc profile..." className="bg-transparent border-none outline-none text-[var(--foreground)] text-xs font-inter w-full" />
+            <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Lọc profile..." className="bg-transparent border-none outline-none text-[var(--foreground)] text-xs w-full" />
             {search && <button onClick={() => setSearch("")} className="bg-none border-none cursor-pointer p-0 text-[var(--muted-foreground)]"><X size={12} /></button>}
           </div>
-          <div className="relative">
-            <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="bg-[var(--card)] border border-[var(--border)] rounded-lg text-[var(--muted-foreground)] text-xs font-inter outline-none appearance-none cursor-pointer"
-              style={{ padding: "6px 28px 6px 10px" }}>
-              {["Tất cả", "Đang chạy", "Đã dừng", "Lỗi", "Đang chờ"].map((s) => <option key={s} className="bg-\[var\(--popover\)\]">{s}</option>)}
-            </select>
-          </div>
+          <Select
+            value={statusFilter}
+            onChange={(v) => { setStatusFilter(v); setPage(1); }}
+            options={["Tất cả", "Đang chạy", "Đã dừng", "Lỗi", "Đang chờ"]}
+            className="bg-[var(--card)] px-2.5 py-1.5 text-xs w-[140px]"
+            listClassName="text-xs"
+          />
         </div>
       </div>
 
@@ -314,12 +317,14 @@ export function BrowserProfiles() {
         <div className="min-w-[900px]">
         <table className="w-full border-collapse">
           <thead><tr className="bg-[var(--card)]">
-            <th className="sticky left-0 z-[3] bg-[var(--card)] w-10 px-4 py-2.5 text-center border-b border-[var(--border)]"><input type="checkbox" checked={selected.size === paginated.length && paginated.length > 0} onChange={toggleAll} className="accent-[var(--primary)] cursor-pointer" /></th>
-            <th onClick={() => toggleSort("name")} className="sticky left-[45px] z-[3] bg-[var(--card)] px-3 py-2.5 text-left text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase cursor-pointer whitespace-nowrap border-b border-[var(--border)]">
+            <th className="sticky left-0 z-[3] bg-[var(--card)] w-12 px-4 py-2.5 text-center border-b border-[var(--border)]">
+              <Checkbox checked={selected.size === paginated.length && paginated.length > 0} onChange={toggleAll} indeterminate={selected.size > 0 && selected.size < paginated.length} />
+            </th>
+            <th onClick={() => toggleSort("name")} className="sticky left-12 z-[3] bg-[var(--card)] px-3 py-2.5 text-left text-sm font-medium text-[var(--muted-foreground)] cursor-pointer whitespace-nowrap border-b border-[var(--border)]">
               <div className="flex items-center gap-1">Tên Profile <SortIcon col="name" /></div>
             </th>
             {[{ key: "group", label: "Nhóm" }, { key: "proxy", label: "Proxy" }, { key: "browser", label: "Trình duyệt" }, { key: "fingerprint", label: "Vân tay" }, { key: "status", label: "Trạng thái" }, { key: "lastActive", label: "Gần nhất" }].map((col) => (
-              <th key={col.key} onClick={() => toggleSort(col.key)} className="px-3 py-2.5 text-left text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase cursor-pointer whitespace-nowrap border-b border-[var(--border)]">
+              <th key={col.key} onClick={() => toggleSort(col.key)} className="px-3 py-2.5 text-left text-sm font-medium text-[var(--muted-foreground)] cursor-pointer whitespace-nowrap border-b border-[var(--border)]">
                 <div className="flex items-center gap-1">{col.label} <SortIcon col={col.key} /></div>
               </th>
             ))}

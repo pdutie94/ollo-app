@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { X, ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProfileStore } from "@/store/useProfileStore";
 import { useGroupStore } from "@/store/useGroupStore";
+import { Select } from "@/components/ui/Select";
 import { slideInRight, backdrop } from "@/lib/animations";
 import type { Profile, Group, ProfileFingerprint } from "@shared/types";
 
@@ -17,23 +18,7 @@ function FormField({ label, value, onChange, placeholder, textarea, type = "text
     <div>
       <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-1.5">{label}</label>
       <Comp value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={textarea ? 3 : undefined} type={type}
-        className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-[13px] outline-none resize-none" />
-    </div>
-  );
-}
-
-function FormSelect({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
-  return (
-    <div>
-      <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-1.5">{label}</label>
-      <div className="relative">
-        <select value={value} onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-[13px] outline-none appearance-none cursor-pointer"
-          style={{ paddingRight: 32 }}>
-          {options.map((o) => <option key={o} value={o} className="bg-\[var\(--popover\)\]">{o}</option>)}
-        </select>
-        <ChevronDown size={13} color="var(--muted-foreground)" className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-      </div>
+        className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-sm outline-none resize-none" />
     </div>
   );
 }
@@ -111,18 +96,18 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
   return (
     <AnimatePresence>
       <motion.div key="backdrop" variants={backdrop} initial="initial" animate="animate" exit="exit" className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
-      <motion.div key="drawer" variants={slideInRight} initial="initial" animate="animate" exit="exit" className="fixed top-0 right-0 h-full z-50 flex flex-col w-[480px] bg-[var(--card)] border-l border-[var(--border)] font-inter">
+      <motion.div key="drawer" variants={slideInRight} initial="initial" animate="animate" exit="exit" className="fixed top-0 right-0 h-full z-50 flex flex-col w-[480px] bg-[var(--card)] border-l border-[var(--border)]">
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[var(--border)]">
           <div>
-            <h2 className="text-base font-semibold text-[var(--foreground)]">Tạo Profile</h2>
+            <h2 className="text-base font-medium text-[var(--foreground)]">Tạo Profile</h2>
             <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Cấu hình profile trình duyệt mới</p>
           </div>
           <button onClick={onClose} className="rounded-lg p-1.5 bg-transparent border-none cursor-pointer text-[var(--muted-foreground)]"><X size={18} /></button>
         </div>
 
-        <div className="flex gap-1 mx-6 mt-3 mb-2 p-1 rounded-lg bg-[var(--accent)]">
+        <div className="flex gap-1 mx-6 mt-3 mb-2 p-1 rounded-lg text-sm bg-accent">
           {sections.map((s) => (
-            <button key={s} onClick={() => setActiveSection(s)} className="flex-1 py-1.5 rounded-md text-xs border-none cursor-pointer"
+            <button key={s} onClick={() => setActiveSection(s)} className="flex-1 py-1.5 rounded-md border-none cursor-pointer"
               style={{ background: activeSection === s ? "var(--card)" : "transparent", color: activeSection === s ? "var(--primary)" : "var(--muted-foreground)", fontWeight: activeSection === s ? 500 : 400 }}>
               {s}
             </button>
@@ -133,7 +118,7 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
           {activeSection === "Thông tin" && (
             <>
               <FormField label="Tên Profile" value={name} onChange={setName} placeholder="VD: US-Chrome-Marketing-001" />
-              <FormSelect label="Nhóm" value={group} onChange={setGroup} options={groupOptions} />
+              <Select label="Nhóm" value={group} onChange={setGroup} options={groupOptions} />
               <FormField label="Ghi chú" value={notes} onChange={setNotes} placeholder="Mô tả (không bắt buộc)" textarea />
             </>
           )}
@@ -144,14 +129,14 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
                 <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-2">Engine trình duyệt</label>
                 <div className="flex gap-2">
                   {["Chromium", "Chrome", "Edge"].map((b) => (
-                    <button key={b} onClick={() => setBrowser(b)} className="flex-1 py-2 rounded-lg text-[13px] font-medium cursor-pointer"
+                    <button key={b} onClick={() => setBrowser(b)} className="flex-1 py-2 rounded-lg text-sm font-medium cursor-pointer"
                       style={{ background: browser === b ? "rgba(79,124,255,0.15)" : "var(--accent)", border: browser === b ? "1px solid var(--primary)" : "1px solid var(--border)", color: browser === b ? "var(--primary)" : "var(--muted-foreground)" }}>
                       {b}
                     </button>
                   ))}
                 </div>
               </div>
-              <FormSelect label="Phiên bản" value={browserVersion} onChange={setBrowserVersion} options={["Mới nhất (ổn định)", "120.0", "119.0", "118.0"]} />
+              <Select label="Phiên bản" value={browserVersion} onChange={setBrowserVersion} options={["Mới nhất (ổn định)", "120.0", "119.0", "118.0"]} />
             </>
           )}
 
@@ -161,18 +146,18 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
                 <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-2">Hệ điều hành</label>
                 <div className="flex gap-2">
                   {["Windows", "macOS", "Linux"].map((o) => (
-                    <button key={o} onClick={() => setOs(o)} className="flex-1 py-2 rounded-lg text-[13px] font-medium cursor-pointer"
+                    <button key={o} onClick={() => setOs(o)} className="flex-1 py-2 rounded-lg text-sm font-medium cursor-pointer"
                       style={{ background: os === o ? "rgba(79,124,255,0.15)" : "var(--accent)", border: os === o ? "1px solid var(--primary)" : "1px solid var(--border)", color: os === o ? "var(--primary)" : "var(--muted-foreground)" }}>
                       {o}
                     </button>
                   ))}
                 </div>
               </div>
-              <FormSelect label="Múi giờ" value={timezone} onChange={setTimezone} options={["America/New_York", "Europe/London", "Asia/Tokyo", "Asia/Singapore"]} />
-              <FormSelect label="Ngôn ngữ" value={language} onChange={setLanguage} options={["vi-VN", "en-US", "en-GB", "ja-JP"]} />
-              <FormSelect label="Độ phân giải" value={resolution} onChange={setResolution} options={["1920×1080", "2560×1440", "1366×768", "1280×800"]} />
+              <Select label="Múi giờ" value={timezone} onChange={setTimezone} options={["America/New_York", "Europe/London", "Asia/Tokyo", "Asia/Singapore"]} />
+              <Select label="Ngôn ngữ" value={language} onChange={setLanguage} options={["vi-VN", "en-US", "en-GB", "ja-JP"]} />
+              <Select label="Độ phân giải" value={resolution} onChange={setResolution} options={["1920×1080", "2560×1440", "1366×768", "1280×800"]} />
               <div className="rounded-lg p-4 bg-[var(--accent)] border border-[var(--border)]">
-                <p className="text-xs font-semibold text-[var(--foreground)] mb-3">Spoofing</p>
+                <p className="text-xs font-medium text-[var(--foreground)] mb-3">Spoofing</p>
                 <div className="flex items-center justify-between py-2 border-b border-[rgba(36,43,56,0.8)]">
                   <span className="text-xs text-[var(--muted-foreground)]">Canvas Fingerprint</span>
                   <ToggleSwitch defaultOn={fpCanvas} onChange={setFpCanvas} />
@@ -203,7 +188,7 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
                 <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-2">Loại Proxy</label>
                 <div className="flex gap-2">
                   {["HTTP", "SOCKS5", "Không"].map((p) => (
-                    <button key={p} onClick={() => setProxyType(p)} className="flex-1 py-2 rounded-lg text-[13px] font-medium cursor-pointer"
+                    <button key={p} onClick={() => setProxyType(p)} className="flex-1 py-2 rounded-lg text-sm font-medium cursor-pointer"
                       style={{ background: proxyType === p ? "rgba(79,124,255,0.15)" : "var(--accent)", border: proxyType === p ? "1px solid var(--primary)" : "1px solid var(--border)", color: proxyType === p ? "var(--primary)" : "var(--muted-foreground)" }}>
                       {p}
                     </button>
@@ -226,7 +211,7 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
           {activeSection === "Khởi động" && (
             <>
               <FormField label="URL khởi động" value={startupUrl} onChange={setStartupUrl} placeholder="https://example.com" textarea />
-              <FormSelect label="Tiện ích" value={ext} onChange={setExt} options={["Không", "Cookie Manager", "User-Agent Switcher", "Canvas Blocker"]} />
+              <Select label="Tiện ích" value={ext} onChange={setExt} options={["Không", "Cookie Manager", "User-Agent Switcher", "Canvas Blocker"]} />
               <div>
                 <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-2">Tuỳ chọn khởi chạy</label>
                 <div className="flex flex-col gap-2">
@@ -243,13 +228,13 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
         </div>
 
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
-          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] font-medium cursor-pointer">Huỷ</button>
+          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-sm font-medium cursor-pointer">Huỷ</button>
           <div className="flex items-center gap-2">
             <button onClick={() => {
               localStorage.setItem('ollo-draft-profile', JSON.stringify({ name, notes, groupId: groups.find((g) => g.name === group)?.id }));
               toast.success('Đã lưu nháp');
-            }} className="rounded-lg px-4 py-2 bg-[var(--accent)] border border-[var(--border)] text-[var(--foreground)] text-[13px] font-medium cursor-pointer">Lưu nháp</button>
-            <button onClick={handleCreate} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">Tạo Profile</button>
+            }} className="rounded-lg px-4 py-2 bg-[var(--accent)] border border-[var(--border)] text-[var(--foreground)] text-sm font-medium cursor-pointer">Lưu nháp</button>
+            <button onClick={handleCreate} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-sm font-medium cursor-pointer">Tạo Profile</button>
           </div>
         </div>
       </motion.div>

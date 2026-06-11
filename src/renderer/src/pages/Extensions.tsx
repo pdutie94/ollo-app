@@ -70,7 +70,7 @@ function AddExtensionDrawer({ onClose, onInstalled }: { onClose: () => void; onI
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
       <div className="fixed top-0 right-0 h-full z-50 flex flex-col w-[500px] bg-[var(--card)] border-l border-[var(--border)]">
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[var(--border)]">
-          <div><h2 className="text-base font-semibold text-[var(--foreground)]">Thêm tiện ích</h2></div>
+          <div><h2 className="text-base font-medium text-[var(--foreground)]">Thêm tiện ích</h2></div>
           <button onClick={onClose} className="rounded-lg p-1.5 bg-transparent border-none cursor-pointer text-[var(--muted-foreground)]"><X size={18} /></button>
         </div>
         <div className="flex gap-1 mx-6 mt-3 p-1 rounded-lg bg-[var(--accent)]">
@@ -89,10 +89,10 @@ function AddExtensionDrawer({ onClose, onInstalled }: { onClose: () => void; onI
                   style={{ background: selected === ext.name ? "rgba(79,124,255,0.12)" : "var(--accent)", border: selected === ext.name ? "1px solid var(--primary)" : "1px solid transparent" }}>
                   <span className="rounded-lg flex items-center justify-center w-9 h-9 bg-[var(--card)] text-lg">{ext.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[var(--foreground)]">{ext.name}</p>
+                    <p className="text-sm font-medium text-[var(--foreground)]">{ext.name}</p>
                     <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{ext.description}</p>
                   </div>
-                  <span className="text-[10px] text-[var(--muted-foreground)] font-inter">v{ext.version}</span>
+                  <span className="text-[10px] text-[var(--muted-foreground)]">v{ext.version}</span>
                 </button>
               ))}
             </div>
@@ -101,20 +101,20 @@ function AddExtensionDrawer({ onClose, onInstalled }: { onClose: () => void; onI
             <div>
               <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-1.5">URL Chrome Web Store</label>
               <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://chromewebstore.google.com/detail/..."
-                className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-xs font-inter outline-none" />
+                className="w-full bg-[var(--accent)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--foreground)] text-xs outline-none" />
             </div>
           )}
           {tab === "file" && (
             <div className="rounded-xl flex flex-col items-center justify-center gap-3 h-40 bg-[var(--accent)] border-2 border-dashed border-[var(--border)] cursor-pointer" onClick={handleAdd}>
               <Upload size={24} color="var(--muted-foreground)" />
-              <p className="text-[13px] font-medium text-[var(--foreground)]">Thả .crx hoặc .xpi vào đây</p>
+              <p className="text-sm font-medium text-[var(--foreground)]">Thả .crx hoặc .xpi vào đây</p>
               <p className="text-xs text-[var(--muted-foreground)]">hoặc click để chọn file</p>
             </div>
           )}
         </div>
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
-          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] cursor-pointer">Huỷ</button>
-          <button onClick={handleAdd} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">
+          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-sm cursor-pointer">Huỷ</button>
+          <button onClick={handleAdd} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-sm font-medium cursor-pointer">
             {installing ? "Đang cài đặt..." : tab === "catalog" ? (selected ? `Cài "${selected}"` : "Chọn tiện ích") : "Cài đặt"}
           </button>
         </div>
@@ -184,12 +184,12 @@ export function Extensions() {
   const updateCount = 0;
 
   return (
-    <div className="flex flex-col h-full font-inter">
+    <div className="flex flex-col h-full">
       <div className="px-6 pt-5 pb-4 shrink-0 border-b border-[var(--border)]">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-[22px] font-semibold text-[var(--foreground)]">Tiện ích</h1>
-            <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">
+            <h1 className="text-[22px] font-medium text-[var(--foreground)]">Tiện ích</h1>
+            <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
               {extensions.length} đã cài · {enabledCount} đang bật{updateCount > 0 && <span className="text-[#F59E0B] ml-2">· {updateCount} bản cập nhật</span>}
             </p>
           </div>
@@ -203,10 +203,10 @@ export function Extensions() {
                 toast.error(res.error || "Import thất bại");
               }
             }}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] font-medium cursor-pointer">
+              className="flex items-center gap-2 rounded-lg px-3 py-2 bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)] text-sm font-medium cursor-pointer">
               <Upload size={14} /> Import
             </button>
-            <button onClick={() => setAddDrawer(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-[13px] font-medium cursor-pointer">
+            <button onClick={() => setAddDrawer(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-sm font-medium cursor-pointer">
               <Plus size={15} /> Thêm tiện ích
             </button>
           </div>
@@ -225,8 +225,8 @@ export function Extensions() {
         {updateCount > 0 && (
           <div className="flex items-center gap-3 rounded-xl px-4 py-3 mb-4" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)" }}>
             <AlertCircle size={16} color="#F59E0B" />
-            <p className="text-[13px] text-[#F59E0B] flex-1">{updateCount} tiện ích có bản cập nhật</p>
-            <button className="rounded-lg px-3 py-1 bg-[#F59E0B] text-black border-none text-xs font-semibold cursor-pointer">Cập nhật tất cả</button>
+            <p className="text-sm text-[#F59E0B] flex-1">{updateCount} tiện ích có bản cập nhật</p>
+            <button className="rounded-lg px-3 py-1 bg-[#F59E0B] text-black border-none text-xs font-medium cursor-pointer">Cập nhật tất cả</button>
           </div>
         )}
         <div className="flex flex-col gap-2">
@@ -238,14 +238,14 @@ export function Extensions() {
               <div className="rounded-xl flex items-center justify-center shrink-0 w-11 h-11 bg-[var(--accent)] text-[22px]">{ext.icon}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-[var(--foreground)]">{ext.name}</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] text-[var(--muted-foreground)] font-inter" style={{ background: "var(--accent)" }}>v{ext.version}</span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">{ext.name}</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] text-[var(--muted-foreground)]" style={{ background: "var(--accent)" }}>v{ext.version}</span>
                 </div>
                 <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{ext.description}</p>
               </div>
               <div className="flex items-center gap-6 shrink-0">
                 <div className="text-right">
-                  <p className="text-xs text-[var(--muted-foreground)] font-inter">{getExtensionSize(ext)}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">{getExtensionSize(ext)}</p>
                   <p className="text-[10px] text-[var(--muted-foreground)]/60">dung lượng</p>
                 </div>
                 <Toggle on={ext.enabled} onChange={() => toggleExtension(ext.id, ext.enabled)} />

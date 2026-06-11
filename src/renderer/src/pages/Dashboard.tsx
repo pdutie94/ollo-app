@@ -74,13 +74,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const errorPct = activeProfiles > 0 ? Math.round((errorCount / activeProfiles) * 100) : 0;
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 font-inter">
+    <div className="flex-1 overflow-y-auto p-6">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[22px] font-semibold text-[var(--foreground)] leading-tight">Dashboard</h1>
-          <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">{new Date().toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
+          <h1 className="text-[22px] font-medium text-[var(--foreground)] leading-tight">Dashboard</h1>
+          <p className="text-sm text-[var(--muted-foreground)] mt-0.5">{new Date().toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
-        <motion.button {...hoverScale} onClick={() => onNavigate("profiles")} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-[13px] font-medium cursor-pointer">
+        <motion.button {...hoverScale} onClick={() => onNavigate("profiles")} className="flex items-center gap-2 rounded-lg px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] border-none text-sm font-medium cursor-pointer">
           <Plus size={15} /> Tạo Profile
         </motion.button>
       </motion.div>
@@ -102,7 +102,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <motion.div variants={staggerItem} className="col-span-2 rounded-xl p-5 bg-[var(--card)] border border-[var(--border)]">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">Hoạt động Profile</h2>
+              <h2 className="text-sm font-medium text-[var(--foreground)]">Hoạt động Profile</h2>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Tổng quan hiện tại</p>
             </div>
             <div className="flex items-center gap-4">
@@ -136,7 +136,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div key={s.label}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-[var(--muted-foreground)]">{s.label}</span>
-                  <span className="text-xs font-semibold tabular-nums" style={{ color: s.color }}>{s.value}</span>
+                  <span className="text-xs font-medium tabular-nums" style={{ color: s.color }}>{s.value}</span>
                 </div>
                 <div className="rounded-full overflow-hidden h-[3px] bg-[var(--accent)]">
                   <div className="rounded-full h-[3px]" style={{ width: `${s.pct}%`, background: s.color }} />
@@ -148,7 +148,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
         <motion.div variants={staggerItem} className="rounded-xl bg-[var(--card)] border border-[var(--border)]">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">Hoạt động gần đây</h2>
+            <h2 className="text-sm font-medium text-[var(--foreground)]">Hoạt động gần đây</h2>
             <Activity size={14} color="var(--muted-foreground)" />
           </div>
           <div className="max-h-[300px] overflow-y-auto">
@@ -168,12 +168,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }} className="mt-4">
-        <p className="text-[13px] font-semibold text-[var(--muted-foreground)] mb-3 uppercase tracking-widest">Truy cập nhanh</p>
+        <p className="text-sm font-medium text-[var(--muted-foreground)] mb-3 uppercase tracking-widest">Truy cập nhanh</p>
         <div className="flex items-center gap-3">
           {[{ icon: Plus, label: "Tạo Profile", primary: true }, { icon: Play, label: "Chạy Profile", primary: false }, { icon: Upload, label: "Import Profile", primary: false }].map((action) => {
             const Icon = action.icon;
             return (
-              <motion.button key={action.label} {...hoverScale} className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] font-medium cursor-pointer"
+              <motion.button key={action.label} {...hoverScale} className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer"
                 style={{ background: action.primary ? "var(--primary)" : "var(--card)", color: action.primary ? "#fff" : "var(--muted-foreground)", border: action.primary ? "none" : "1px solid var(--border)" }}>
                 <Icon size={15} /> {action.label}
               </motion.button>

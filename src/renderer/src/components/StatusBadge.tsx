@@ -42,7 +42,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     <motion.span
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium font-inter leading-relaxed"
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium leading-relaxed"
       style={{ background: config.bg, color: config.text }}
     >
       <motion.span
