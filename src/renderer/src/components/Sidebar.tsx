@@ -1,6 +1,7 @@
 import { LayoutDashboard, Globe, FolderOpen, Shield, Puzzle, Settings, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useUIStore, type ActiveView } from "@/store/useUIStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 
 const navItems: { id: ActiveView; icon: React.ElementType; label: string }[] = [
@@ -15,6 +16,10 @@ const navItems: { id: ActiveView; icon: React.ElementType; label: string }[] = [
 export function Sidebar() {
   const activeView = useUIStore((s) => s.activeView);
   const setActiveView = useUIStore((s) => s.setActiveView);
+  const settings = useSettingsStore((s) => s.settings);
+  const userName = settings.userName || "Người dùng";
+  const userPlan = settings.userPlan || "Gói Miễn phí";
+  const initials = userName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || "U";
 
   return (
     <motion.aside
@@ -73,14 +78,14 @@ export function Sidebar() {
           <div className="rounded-full flex items-center justify-center shrink-0 w-[30px] h-[30px] text-xs font-semibold text-[var(--foreground)] font-inter"
             style={{ background: "linear-gradient(135deg, #4F7CFF 0%, #8B5CF6 100%)" }}
           >
-            AK
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[var(--foreground)] text-[13px] font-medium font-inter leading-tight">
-              Alex Kim
+              {userName}
             </p>
             <p className="text-[var(--muted-foreground)] text-xs font-inter leading-tight">
-              Gói Pro
+              {userPlan}
             </p>
           </div>
         </div>

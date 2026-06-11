@@ -3,6 +3,7 @@ import { PlaywrightRuntime } from './playwright-runtime'
 import { processManager } from './process-manager'
 import { getUserDataDir } from './profile-store'
 import { eventBus } from '../core/events/event-bus'
+import { recordEvent } from './event-history'
 import { getProfileById, updateProfile } from './profile-manager'
 import { getProxyById } from './proxy-manager'
 import type { Proxy } from '@shared/types'
@@ -48,9 +49,16 @@ class BrowserLauncher {
         timestamp: new Date().toISOString()
       })
 
+      recordEvent({
+        type: 'profile:started',
+        profileId,
+        profileName: profile.name
+      })
+
       return { success: true }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to launch browser'
+      recordEvent({ type: 'profile:error', profileId, profileName: getProfileById(profileId)?.name })
       return { success: false, error: message }
     }
   }
@@ -69,6 +77,12 @@ class BrowserLauncher {
       eventBus.emit('profile:stopped', {
         profileId,
         timestamp: new Date().toISOString()
+      })
+
+      recordEvent({
+        type: 'profile:stopped',
+        profileId,
+        profileName: getProfileById(profileId)?.name
       })
 
       updateProfile(profileId, { status: 'stopped' })

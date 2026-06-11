@@ -64,6 +64,8 @@ export interface CreateGroupDTO {
 
 export interface UserSettings {
   // General
+  userName?: string
+  userPlan?: string
   defaultWorkspace: string
   language: string
   autoSave: boolean

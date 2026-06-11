@@ -3,15 +3,8 @@ import { Bell, Search, X, AlertCircle, Info, Check, Sun, Moon, Monitor, Settings
 import { motion, AnimatePresence } from "framer-motion";
 import { useThemeStore, type ThemePreference } from "@/store/useThemeStore";
 import { useUIStore } from "@/store/useUIStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { scaleIn } from "@/lib/animations";
-
-const notifications = [
-  { id: "1", type: "error", title: "Proxy không kết nối được", body: "Datacenter-SG-09 hết thời gian chờ", time: "2 phút", unread: true },
-  { id: "2", type: "success", title: "Khởi chạy hàng loạt hoàn tất", body: "47 profile đã khởi chạy thành công", time: "8 phút", unread: true },
-  { id: "3", type: "info", title: "Có bản cập nhật tiện ích", body: "User-Agent Switcher v3.1.1", time: "1 giờ", unread: true },
-  { id: "4", type: "warning", title: "Hạn mức proxy đạt 85%", body: "Residential-US gần đầy", time: "3 giờ", unread: false },
-  { id: "5", type: "success", title: "Import hoàn tất", body: "50 profile được import từ CSV", time: "5 giờ", unread: false },
-];
 
 const notifColors: Record<string, string> = { error: "#EF4444", success: "#22C55E", info: "#4F7CFF", warning: "#F59E0B" };
 const notifIcons: Record<string, React.ElementType> = { error: AlertCircle, success: Check, info: Info, warning: AlertCircle };
@@ -22,17 +15,38 @@ const themeOptions: { value: ThemePreference; icon: typeof Sun; label: string }[
   { value: "system", icon: Monitor, label: "Hệ thống" },
 ];
 
+interface Notification {
+  id: string; type: string; title: string; body: string; time: string; unread: boolean;
+}
+
 export function Header() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
-  const [notifs, setNotifs] = useState(notifications);
+  const [notifs, setNotifs] = useState<Notification[]>([]);
   const [search, setSearch] = useState("");
   const notifRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
   const { preference, setPreference } = useThemeStore();
   const setActiveView = useUIStore((s) => s.setActiveView);
   const setGlobalSearch = useUIStore((s) => s.setGlobalSearch);
+  const settings = useSettingsStore((s) => s.settings);
+  const userName = settings.userName || "Người dùng";
+  const initials = userName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || "U";
   const unreadCount = notifs.filter((n) => n.unread).length;
+
+  // Listen for browser events to show live notifications
+  useEffect(() => {
+    const cleanup = window.api.onBrowserEvent((event) => {
+      if (event.type === "profile:started") {
+        const id = Math.random().toString(36).slice(2);
+        setNotifs((n) => [{ id, type: "success", title: "Profile đã khởi chạy", body: `Profile ${event.profileId.slice(0, 8)}... đang chạy`, time: "Vừa xong", unread: true }, ...n.slice(0, 9)]);
+      } else if (event.type === "profile:stopped") {
+        const id = Math.random().toString(36).slice(2);
+        setNotifs((n) => [{ id, type: "info", title: "Profile đã dừng", body: `Profile ${event.profileId.slice(0, 8)}... đã dừng`, time: "Vừa xong", unread: true }, ...n.slice(0, 9)]);
+      }
+    });
+    return cleanup;
+  }, []);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && search.trim()) {
@@ -124,7 +138,7 @@ export function Header() {
           <button onClick={() => setAvatarOpen(!avatarOpen)}
             className="rounded-full flex items-center justify-center cursor-pointer w-[30px] h-[30px] text-xs font-semibold text-[var(--foreground)] border-none"
             style={{ background: avatarOpen ? "linear-gradient(135deg, #6F9CFF 0%, #A87DFF 100%)" : "linear-gradient(135deg, #4F7CFF 0%, #8B5CF6 100%)" }}>
-            AK
+            {initials}
           </button>
           <AnimatePresence>
             {avatarOpen && (
@@ -132,7 +146,7 @@ export function Header() {
                 className="absolute right-0 z-50 rounded-xl mt-2 w-[220px] bg-[var(--popover)] border border-[var(--border)] shadow-xl py-1.5"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
                 <div className="px-4 py-2 border-b border-[var(--border)]">
-                  <p className="text-sm font-semibold text-[var(--foreground)]">Alex Kim</p>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">{userName}</p>
                   <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Gói Pro</p>
                 </div>
                 <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">

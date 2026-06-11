@@ -1,11 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Globe, Activity, Shield, Puzzle, Plus, Play, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useProfileStore } from "@/store/useProfileStore";
 import { useProxyStore } from "@/store/useProxyStore";
 import { useGroupStore } from "@/store/useGroupStore";
-import { useToastStore } from "@/store/useToastStore";
 import { staggerContainer, staggerItem, hoverScale } from "@/lib/animations";
 import type { Profile, Proxy, Group } from "@shared/types";
 
@@ -24,12 +23,33 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const setProxies = useProxyStore((s) => s.setProxies);
   const groups = useGroupStore((s) => s.groups);
   const setGroups = useGroupStore((s) => s.setGroups);
-  const toasts = useToastStore((s) => s.toasts);
+  const [chartData, setChartData] = useState<{ time: string; running: number; error: number }[]>([]);
+  const [errorCount, setErrorCount] = useState(0);
+  const [eventFeed, setEventFeed] = useState<{ action: string; target: string; time: string; type: string }[]>([]);
 
   useEffect(() => {
     window.api.profileList().then((res) => { if (res.success && res.data) setProfiles(res.data as Profile[]); }).catch((err) => console.error("Failed to load profiles:", err));
     window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); }).catch((err) => console.error("Failed to load proxies:", err));
     window.api.groupList().then((res) => { if (res.success && res.data) setGroups(res.data as Group[]); }).catch((err) => console.error("Failed to load groups:", err));
+    window.api.eventChart().then((res) => { if (res.success && res.data) setChartData(res.data as { time: string; running: number; error: number }[]); }).catch(() => {});
+    window.api.errorCount().then((res) => { if (res.success && res.data) setErrorCount((res.data as { count: number }).count); }).catch(() => {});
+    window.api.eventHistory(10).then((res) => {
+      if (res.success && res.data) {
+        const events = res.data as { type: string; profileName?: string; timestamp: string }[];
+        setEventFeed(events.map((e) => {
+          const typeLabel: Record<string, string> = { 'profile:started': 'launch', 'profile:stopped': 'stop', 'profile:created': 'create', 'profile:deleted': 'delete', 'profile:error': 'error' };
+          const actionLabel: Record<string, string> = { 'profile:started': 'Đã chạy', 'profile:stopped': 'Đã dừng', 'profile:created': 'Đã tạo', 'profile:deleted': 'Đã xoá', 'profile:error': 'Lỗi' };
+          const t = new Date(e.timestamp);
+          const timeStr = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+          return {
+            action: actionLabel[e.type] || e.type,
+            target: e.profileName || '',
+            time: timeStr,
+            type: typeLabel[e.type] || 'stop'
+          };
+        }));
+      }
+    }).catch(() => {});
   }, []);
 
   const totalProfiles = profiles.length;
@@ -45,28 +65,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     { label: "Nhóm", value: totalGroups.toLocaleString(), change: `${groups.filter((g) => profiles.some((p) => p.groupId === g.id)).length} đang dùng`, icon: Puzzle, accent: "#8B5CF6", bg: "rgba(139,92,246,0.1)" },
   ];
 
-  const chartData = [
-    { time: "00:00", running: Math.round(activeProfiles * 0.35), error: 1 },
-    { time: "04:00", running: Math.round(activeProfiles * 0.28), error: 0 },
-    { time: "08:00", running: Math.round(activeProfiles * 0.6), error: 1 },
-    { time: "12:00", running: activeProfiles, error: 0 },
-    { time: "16:00", running: Math.round(activeProfiles * 0.8), error: 0 },
-    { time: "20:00", running: Math.round(activeProfiles * 0.55), error: 1 },
-    { time: "Bây giờ", running: activeProfiles, error: 0 },
-  ];
-
-  const recentToasts = toasts.slice(-6).reverse();
-  const activityFeed = recentToasts.length > 0
-    ? recentToasts.map((t) => ({
-        action: t.message,
-        target: "",
-        time: "Vừa xong",
-        type: t.type as string,
-      }))
+  const activityFeed = eventFeed.length > 0
+    ? eventFeed
     : [{ action: "Chưa có hoạt động", target: "Tạo profile đầu tiên để bắt đầu", time: "—", type: "stop" }];
 
   const runningPct = totalProfiles > 0 ? Math.round((activeProfiles / totalProfiles) * 100) : 0;
   const stoppedPct = totalProfiles > 0 ? Math.round((stoppedProfiles / totalProfiles) * 100) : 100;
+  const errorPct = activeProfiles > 0 ? Math.round((errorCount / activeProfiles) * 100) : 0;
 
   return (
     <div className="flex-1 overflow-y-auto p-6 font-inter">
@@ -126,7 +131,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             {[
               { label: "Đang chạy", value: activeProfiles, color: "#22C55E", pct: runningPct },
               { label: "Không hoạt động", value: stoppedProfiles, color: "#A1A8B5", pct: stoppedPct },
-              { label: "Lỗi", value: 0, color: "#EF4444", pct: 0 },
+              { label: "Lỗi", value: errorCount, color: "#EF4444", pct: errorPct },
             ].map((s) => (
               <div key={s.label}>
                 <div className="flex items-center justify-between mb-1">

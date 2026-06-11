@@ -12,6 +12,7 @@ import { useProfileStore } from "@/store/useProfileStore";
 import { useGroupStore } from "@/store/useGroupStore";
 import { useProxyStore } from "@/store/useProxyStore";
 import { useToastStore } from "@/store/useToastStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import type { Profile, Group, Proxy } from "@shared/types";
 
 const fingerprintColors: Record<string, { bg: string; text: string; label: string }> = {
@@ -105,6 +106,7 @@ export function BrowserProfiles() {
   const setGroups = useGroupStore((s) => s.setGroups);
   const proxies = useProxyStore((s) => s.proxies);
   const setProxies = useProxyStore((s) => s.setProxies);
+  const settings = useSettingsStore((s) => s.settings);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -143,6 +145,13 @@ export function BrowserProfiles() {
     return p ? `${p.host}:${p.port}` : "—";
   };
 
+  const getFingerprintStatus = (): "Verified" | "Warning" | "Unknown" => {
+    const s = settings;
+    if (s.canvasSpoofing || s.webglSpoofing || s.audioSpoofing || s.webrtcProtection) return "Verified";
+    if (s.fontFingerprintGuard || s.autoTimezone) return "Warning";
+    return "Unknown";
+  };
+
   const displayProfiles = profiles.map((p) => ({
     id: p.id,
     name: p.name,
@@ -150,7 +159,7 @@ export function BrowserProfiles() {
     groupId: p.groupId,
     proxy: getProxyHost(p.proxyId),
     browser: p.userAgent ? p.userAgent.slice(0, 30) + (p.userAgent.length > 30 ? "..." : "") : "—",
-    fingerprint: "Verified" as const,
+    fingerprint: getFingerprintStatus(),
     status: (runningProfileIds.includes(p.id) ? "running" : "stopped") as "running" | "stopped" | "error" | "pending",
     lastActive: new Date(p.updatedAt).toLocaleDateString("vi-VN"),
   }));
@@ -170,8 +179,26 @@ export function BrowserProfiles() {
 
   const launchSingle = async (id: string) => { const res = await window.api.profileLaunch(id); if (res.success) setProfileRunning(id); addToast(res.success ? "Đã chạy profile" : (res.error ?? "Thất bại"), res.success ? "success" : "error"); setActiveMenu(null); };
   const stopSingle = async (id: string) => { const res = await window.api.profileStop(id); if (res.success) setProfileStopped(id); setActiveMenu(null); };
-  const launchSelected = async () => { for (const id of selected) await window.api.profileLaunch(id); addToast(`Đã chạy ${selected.size} profile`, "success"); setSelected(new Set()); };
-  const stopSelected = async () => { for (const id of selected) await window.api.profileStop(id); setSelected(new Set()); };
+  const launchSelected = async () => {
+    let success = 0; let failed = 0; const errors: string[] = [];
+    for (const id of selected) {
+      const res = await window.api.profileLaunch(id);
+      if (res.success) { setProfileRunning(id); success++; }
+      else { failed++; errors.push(res.error || id.slice(0,8)); }
+    }
+    addToast(`Đã chạy ${success}/${selected.size} profile` + (failed > 0 ? ` · ${failed} lỗi` : ""), failed > 0 ? "error" : "success");
+    setSelected(new Set());
+  };
+  const stopSelected = async () => {
+    let success = 0; let failed = 0;
+    for (const id of selected) {
+      const res = await window.api.profileStop(id);
+      if (res.success) { setProfileStopped(id); success++; }
+      else { failed++; }
+    }
+    addToast(`Đã dừng ${success}/${selected.size} profile` + (failed > 0 ? ` · ${failed} lỗi` : ""), failed > 0 ? "error" : "success");
+    setSelected(new Set());
+  };
   const duplicateSelected = async () => {
     for (const id of selected) { await window.api.profileDuplicate(id); }
     const res = await window.api.profileList();

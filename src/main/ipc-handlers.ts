@@ -7,6 +7,8 @@ import { createProxy, getAllProxies, updateProxy, deleteProxy, testProxy } from 
 import { createGroup, getAllGroups, updateGroup, deleteGroup } from './services/group-manager'
 import { getSettings, updateSettings } from './services/settings-manager'
 import { getExtensions, addExtension, removeExtension, toggleExtension } from './services/extension-manager'
+import { getRecentEvents, getChartBuckets } from './services/event-history'
+import { getErrorCount } from './core/errors/errorLogger'
 import { setupPartition } from './services/session-manager'
 import { browserLauncher } from './services/browser-launcher'
 import { eventBus } from './core/events/event-bus'
@@ -503,6 +505,36 @@ export function registerIpcHandlers(): void {
       return { success: true, data: ext }
     } catch (error) {
       logError(error, 'extension:install-from-file')
+      return { success: false, error: toErrorMessage(error) }
+    }
+  })
+
+  // Event history (for dashboard)
+  ipcMain.handle('event:history', (_event, limit = 20): IpcResult => {
+    try {
+      const events = getRecentEvents(limit)
+      return { success: true, data: events }
+    } catch (error) {
+      logError(error, 'event:history')
+      return { success: false, error: toErrorMessage(error) }
+    }
+  })
+
+  ipcMain.handle('event:chart', (_event, hours = 24): IpcResult => {
+    try {
+      const buckets = getChartBuckets(hours)
+      return { success: true, data: buckets }
+    } catch (error) {
+      logError(error, 'event:chart')
+      return { success: false, error: toErrorMessage(error) }
+    }
+  })
+
+  ipcMain.handle('error:count', (): IpcResult => {
+    try {
+      return { success: true, data: { count: getErrorCount() } }
+    } catch (error) {
+      logError(error, 'error:count')
       return { success: false, error: toErrorMessage(error) }
     }
   })

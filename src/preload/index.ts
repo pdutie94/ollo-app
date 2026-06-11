@@ -60,6 +60,11 @@ const api = {
   configImport: (): Promise<IpcResult> => ipcRenderer.invoke('config:import'),
   profileImportFile: (): Promise<IpcResult> => ipcRenderer.invoke('profile:import-file'),
 
+  // Events
+  eventHistory: (limit?: number): Promise<IpcResult> => ipcRenderer.invoke('event:history', limit ?? 20),
+  eventChart: (hours?: number): Promise<IpcResult> => ipcRenderer.invoke('event:chart', hours ?? 24),
+  errorCount: (): Promise<IpcResult> => ipcRenderer.invoke('error:count'),
+
   // Group
   groupCreate: (dto: CreateGroupDTO): Promise<IpcResult> =>
     ipcRenderer.invoke('group:create', dto),

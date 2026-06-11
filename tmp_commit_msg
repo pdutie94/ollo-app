@@ -1,18 +1,16 @@
-Phase 6: Complete Stub Implementations
+Phase 7: Remove Mock Data — real dashboard, real sidebar/header, real batch ops
 
-- Replace fake proxy test with real window.api.proxyTest() call
-- Replace fake latency with real Date.now() timing
-- Display real country from ProxyTestResult instead of hardcoded "—"
-- Add countryToFlag mapping for flag emoji display
-- Implement real ImportDrawer with CSV/JSON parsing via IPC
-- Add profile:import-file IPC handler with dialog + format detection
-- Add extension:install-from-url and extension:install-from-file IPC handlers
-- Update AddExtensionDrawer with real API calls and onInstalled callback
-- Wire Header search bar to global search (Enter navigates to profiles)
-- Implement Save Draft button (localStorage)
-- Wire Header profile/logout buttons to settings/page actions
-- Add globalSearch to useUIStore
-- Add profileImportFile, extensionInstallFromUrl, extensionInstallFromFile to preload API
-- Update type declarations in both env.d.ts and preload/index.d.ts
+- Add event-history service recording profile lifecycle events
+- Wire event recording into browser-launcher (start/stop/error)
+- Add IPC handlers: event:history, event:chart, error:count
+- Replace mock chartData with real time-series from event-history
+- Replace hardcoded error count 0 with live errorCount from errorLogger
+- Replace toast-based activity feed with real event history feed
+- Replace Sidebar hardcoded user "Alex Kim" with settings-based userName/userPlan
+- Replace Header hardcoded initials "AK" with computed initials
+- Replace static Header notifications with live browser-event-driven notifications
+- Replace always-"Verified" fingerprint with computed status based on settings
+- Add userName/userPlan to UserSettings type
+- Fix launchSelected/stopSelected to track and report per-profile success/failure
 
 Co-authored-by: CommandCodeBot <noreply@commandcode.ai>

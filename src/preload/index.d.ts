@@ -22,6 +22,9 @@ interface OlloAPI {
   configExport: () => Promise<IpcResult>
   configImport: () => Promise<IpcResult>
   profileImportFile: () => Promise<IpcResult>
+  eventHistory: (limit?: number) => Promise<IpcResult>
+  eventChart: (hours?: number) => Promise<IpcResult>
+  errorCount: () => Promise<IpcResult>
   groupCreate: (dto: CreateGroupDTO) => Promise<IpcResult>
   groupList: () => Promise<IpcResult>
   groupUpdate: (id: string, dto: Partial<CreateGroupDTO>) => Promise<IpcResult>
