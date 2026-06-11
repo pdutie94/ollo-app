@@ -19,6 +19,7 @@ class ProcessManager {
           profileId
         })
         eventBus.emit('profile:stopped', {
+          type: 'profile:stopped',
           profileId,
           timestamp: new Date().toISOString()
         })

@@ -25,7 +25,7 @@ export class PlaywrightRuntime implements BrowserRuntime {
         : undefined
     })
 
-    return new PlaywrightHandle(profileId, context, context.browser()!)
+    return new PlaywrightHandle(profileId, context)
   }
 
   async stop(handle: RuntimeHandle): Promise<void> {

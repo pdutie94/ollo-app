@@ -3,32 +3,56 @@ import type { RuntimeHandle } from './browser-runtime'
 
 export class PlaywrightHandle implements RuntimeHandle {
   private closed = false
-  private pageCount = 0
+  private nonEmptyPageCount = 0
   private idleTimer: ReturnType<typeof setTimeout> | null = null
-  private pollTimer: ReturnType<typeof setInterval> | null = null
 
   constructor(
     public readonly profileId: string,
     private readonly context: BrowserContext
   ) {
-    // API close
-    this.context.on('close', () => this.notifyClose())
+    console.log(`[PlaywrightHandle:${profileId.slice(0,8)}] Created, tracking pages`)
 
-    // Browser disconnect
+    // API close
+    this.context.on('close', () => {
+      console.log(`[PlaywrightHandle:${profileId.slice(0,8)}] context.on('close')`)
+      this.notifyClose()
+    })
+
+    // Browser disconnected
     const browser = this.context.browser()
     if (browser) {
-      browser.on('disconnected', () => this.notifyClose())
+      browser.on('disconnected', () => {
+        console.log(`[PlaywrightHandle:${profileId.slice(0,8)}] browser.on('disconnected')`)
+        this.notifyClose()
+      })
     }
 
-    // Track page count — when user closes all tabs manually
+    const isNonEmptyPage = (p: Page) => {
+      try {
+        const url = p.url()
+        return url && url !== 'about:blank' && !url.startsWith('chrome://')
+      } catch { return false }
+    }
+
     const handlePage = (page: Page) => {
-      this.pageCount++
+      if (isNonEmptyPage(page)) {
+        this.nonEmptyPageCount++
+        console.log(`[PlaywrightHandle:${profileId.slice(0,8)}] Page opened (${page.url().slice(0,40)}), count=${this.nonEmptyPageCount}`)
+      } else {
+        console.log(`[PlaywrightHandle:${profileId.slice(0,8)}] Blank page opened, ignoring`)
+      }
       this.clearIdleTimer()
       page.on('close', () => {
-        this.pageCount--
-        if (this.pageCount <= 0 && !this.closed) {
+        if (isNonEmptyPage(page)) {
+          this.nonEmptyPageCount--
+          console.log(`[PlaywrightHandle:${profileId.slice(0,8)}] Page closed, count=${this.nonEmptyPageCount}`)
+        }
+        if (this.nonEmptyPageCount <= 0 && !this.closed) {
           this.idleTimer = setTimeout(() => {
-            if (this.pageCount <= 0 && !this.closed) this.notifyClose()
+            if (this.nonEmptyPageCount <= 0 && !this.closed) {
+              console.log(`[PlaywrightHandle:${profileId.slice(0,8)}] All pages closed, notifying`)
+              this.notifyClose()
+            }
           }, 2000)
         }
       })
@@ -39,19 +63,11 @@ export class PlaywrightHandle implements RuntimeHandle {
     }
 
     this.context.on('page', handlePage)
-
-    // Fallback: poll browser.isConnected() every 2s
-    this.pollTimer = setInterval(() => {
-      if (this.closed) return
-      const b = this.context.browser()
-      if (b && !b.isConnected()) {
-        this.notifyClose()
-      }
-    }, 2000)
   }
 
   private notifyClose(): void {
     if (this.closed) return
+    console.log(`[PlaywrightHandle:${this.profileId.slice(0,8)}] notifyClose triggered`)
     this.closed = true
     this.cleanup()
     this.onCloseCallback?.()
@@ -59,10 +75,6 @@ export class PlaywrightHandle implements RuntimeHandle {
 
   private cleanup(): void {
     this.clearIdleTimer()
-    if (this.pollTimer) {
-      clearInterval(this.pollTimer)
-      this.pollTimer = null
-    }
   }
 
   private clearIdleTimer(): void {

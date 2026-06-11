@@ -30,10 +30,12 @@ function App() {
   // Listen for browser events from main process
   useEffect(() => {
     const cleanup = window.api.onBrowserEvent((event: BrowserEvent) => {
+      console.log('[App] onBrowserEvent:', event.type, event.profileId.slice(0,8))
       if (event.type === "profile:started") {
         setProfileRunning(event.profileId);
         addToast(`Đã chạy profile ${event.profileId.slice(0, 8)}...`, "success");
       } else if (event.type === "profile:stopped") {
+        console.log('[App] Setting profile stopped:', event.profileId.slice(0,8))
         setProfileStopped(event.profileId);
         addToast(`Đã dừng profile ${event.profileId.slice(0, 8)}...`, "info");
       }

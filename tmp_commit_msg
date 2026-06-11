@@ -1,6 +1,9 @@
-Fix: auto-detect process exit — update DB & event history when Chrome closed manually
+Fix: detect manual Chrome close via page count + browser disconnected
 
-- process-manager onClose now calls updateProfile(status:stopped) + recordEvent
-- Previously only emitted event but never updated DB, causing stuck "running" state
+- Track non-empty page count with idle timer — when all real pages closed, trigger notifyClose
+- Listen to browser.on('disconnected') for crash/kill detection
+- Add debug logs for troubleshooting page lifecycle
+- Fix eventBus.emit missing 'type' field causing renderer to ignore profile:stopped event
+- Add console.log in App.tsx onBrowserEvent for verification
 
 Co-authored-by: CommandCodeBot <noreply@commandcode.ai>
