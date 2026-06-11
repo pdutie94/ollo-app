@@ -58,6 +58,7 @@ const api = {
   // Config
   configExport: (): Promise<IpcResult> => ipcRenderer.invoke('config:export'),
   configImport: (): Promise<IpcResult> => ipcRenderer.invoke('config:import'),
+  profileImportFile: (): Promise<IpcResult> => ipcRenderer.invoke('profile:import-file'),
 
   // Group
   groupCreate: (dto: CreateGroupDTO): Promise<IpcResult> =>
@@ -79,7 +80,11 @@ const api = {
   extensionRemove: (id: string): Promise<IpcResult> =>
     ipcRenderer.invoke('extension:remove', id),
   extensionToggle: (id: string, enabled: boolean): Promise<IpcResult> =>
-    ipcRenderer.invoke('extension:toggle', id, enabled)
+    ipcRenderer.invoke('extension:toggle', id, enabled),
+  extensionInstallFromUrl: (url: string, name?: string): Promise<IpcResult> =>
+    ipcRenderer.invoke('extension:install-from-url', { url, name }),
+  extensionInstallFromFile: (): Promise<IpcResult> =>
+    ipcRenderer.invoke('extension:install-from-file')
 }
 
 if (process.contextIsolated) {

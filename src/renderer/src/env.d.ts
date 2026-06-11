@@ -36,6 +36,7 @@ declare global {
       sessionSetup: (profileId: string, proxy?: CreateProxyDTO | null, extensionPaths?: string[]) => Promise<IpcResult>
       configExport: () => Promise<IpcResult>
       configImport: () => Promise<IpcResult>
+      profileImportFile: () => Promise<IpcResult>
       groupCreate: (dto: CreateGroupDTO) => Promise<IpcResult>
       groupList: () => Promise<IpcResult>
       groupUpdate: (id: string, dto: Partial<CreateGroupDTO>) => Promise<IpcResult>
@@ -46,6 +47,8 @@ declare global {
       extensionAdd: (data: Omit<AppExtension, 'id'>) => Promise<IpcResult>
       extensionRemove: (id: string) => Promise<IpcResult>
       extensionToggle: (id: string, enabled: boolean) => Promise<IpcResult>
+      extensionInstallFromUrl: (url: string, name?: string) => Promise<IpcResult>
+      extensionInstallFromFile: () => Promise<IpcResult>
     }
     electron: unknown
   }

@@ -15,13 +15,38 @@ const countries = [
 
 const latencyColor = (ms: number | null) => { if (ms === null) return "#6B7280"; if (ms < 100) return "#22C55E"; if (ms < 250) return "#F59E0B"; return "#EF4444"; };
 
+const countryToFlag: Record<string, string> = {
+  "United States": "🇺🇸", Germany: "🇩🇪", Japan: "🇯🇵", "United Kingdom": "🇬🇧",
+  France: "🇫🇷", Brazil: "🇧🇷", Singapore: "🇸🇬", Australia: "🇦🇺",
+  Canada: "🇨🇦", India: "🇮🇳", Netherlands: "🇳🇱", Sweden: "🇸🇪",
+  Switzerland: "🇨🇭", "South Korea": "🇰🇷", Russia: "🇷🇺", Italy: "🇮🇹",
+  Spain: "🇪🇸", Indonesia: "🇮🇩", Vietnam: "🇻🇳", Thailand: "🇹🇭",
+};
+
+function getFlagEmoji(country: string): string {
+  return countryToFlag[country] || "";
+}
+
 function AddProxyDrawer({ onClose, editProxy }: { onClose: () => void; editProxy?: Proxy }) {
   const addProxy = useProxyStore((s) => s.addProxy);
   const updateProxy = useProxyStore((s) => s.updateProxy);
   const [host, setHost] = useState(editProxy?.host ?? ""); const [port, setPort] = useState(String(editProxy?.port ?? "8080")); const [type, setType] = useState<"HTTP" | "HTTPS" | "SOCKS5">((editProxy?.type.toUpperCase() ?? "HTTP") as "HTTP" | "HTTPS" | "SOCKS5"); const [country, setCountry] = useState(countries[0]);
   const [testing, setTesting] = useState(false); const [testResult, setTestResult] = useState<null | { ok: boolean; ms: number }>(null);
 
-  const handleTest = () => { if (!host) { toast.error("Nhập host trước"); return; } setTesting(true); setTestResult(null); setTimeout(() => { const ok = Math.random() > 0.25; setTesting(false); setTestResult({ ok, ms: Math.floor(Math.random() * 300) + 40 }); }, 1500); };
+  const handleTest = async () => {
+    if (!host) { toast.error("Nhập host trước"); return; }
+    setTesting(true); setTestResult(null);
+    const start = Date.now();
+    const res = await window.api.proxyTest({ type: type.toLowerCase() as "http" | "https" | "socks5", host, port: parseInt(port) });
+    const ms = Date.now() - start;
+    setTesting(false);
+    if (res.success && res.data) {
+      const result = res.data as ProxyTestResult;
+      setTestResult({ ok: result.success, ms });
+    } else {
+      setTestResult({ ok: false, ms });
+    }
+  };
 
   const handleSubmit = async () => {
     if (!host || !port) { toast.error("Host và port là bắt buộc"); return; }
@@ -124,18 +149,22 @@ export function ProxyManagement() {
   const [testing, setTesting] = useState<Set<string>>(new Set());
   const [latencyMap, setLatencyMap] = useState<Record<string, number | null>>({});
   const [statusMap, setStatusMap] = useState<Record<string, ProxyStatus>>({});
+  const [countryMap, setCountryMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); }).catch((err) => console.error("Failed to load proxies:", err));
   }, []);
 
-  const getDisplayRow = (p: Proxy) => ({
-    ...p,
-    country: "—",
-    flag: "",
-    status: (statusMap[p.id] ?? "stopped") as ProxyStatus,
-    latency: latencyMap[p.id] ?? null,
-  });
+  const getDisplayRow = (p: Proxy) => {
+    const c = countryMap[p.id];
+    return {
+      ...p,
+      country: c || "—",
+      flag: c ? getFlagEmoji(c) : "",
+      status: (statusMap[p.id] ?? "stopped") as ProxyStatus,
+      latency: latencyMap[p.id] ?? null,
+    };
+  };
 
   const testProxy = async (id: string) => {
     setTesting((t) => new Set([...t, id]));
@@ -143,13 +172,16 @@ export function ProxyManagement() {
       const p = proxies.find((px) => px.id === id);
       if (!p) return;
 
+      const start = Date.now();
       const res = await window.api.proxyTest(p as unknown as CreateProxyDTO);
+      const ms = Date.now() - start;
+
       if (res.success && res.data) {
         const result = res.data as ProxyTestResult;
         setStatusMap((s) => ({ ...s, [id]: result.success ? "running" : "error" }));
-        if (result.ip) {
-          const ms = Math.floor(Math.random() * 280) + 45;
+        if (result.success && result.ip) {
           setLatencyMap((l) => ({ ...l, [id]: ms }));
+          if (result.country) setCountryMap((c) => ({ ...c, [id]: result.country! }));
           toast(`Proxy hoạt động · ${ms}ms`, { style: { background: "#22C55E", color: "#fff" } });
         } else {
           setLatencyMap((l) => ({ ...l, [id]: null }));
@@ -214,7 +246,7 @@ export function ProxyManagement() {
         <table className="w-full border-collapse">
           <thead><tr className="bg-[var(--card)]">
             <th className="w-10 px-4 py-2.5 text-center border-b border-[var(--border)]"><input type="checkbox" className="accent-[var(--primary)]" /></th>
-            {["Host", "Cổng", "Loại", "Trạng thái", "Độ trễ", ""].map((col) => (
+            {["Host", "Cổng", "Loại", "Quốc gia", "Trạng thái", "Độ trễ", ""].map((col) => (
               <th key={col} className="px-3 py-2.5 text-left text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase border-b border-[var(--border)]">{col}</th>
             ))}
           </tr></thead>
@@ -232,6 +264,7 @@ export function ProxyManagement() {
                 </td>
                 <td className="px-3 py-2.5 text-xs font-inter text-[var(--muted-foreground)]">{proxy.port}</td>
                 <td className="px-3 py-2.5"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs text-[var(--muted-foreground)]" style={{ background: "var(--accent)" }}>{proxy.type.toUpperCase()}</span></td>
+                <td className="px-3 py-2.5 text-xs text-[var(--muted-foreground)]">{row.flag ? `${row.flag} ${row.country}` : row.country}</td>
                 <td className="px-3 py-2.5">{testing.has(proxy.id) ? <span className="text-xs text-[var(--primary)]">Đang kiểm tra...</span> : <StatusBadge status={row.status} />}</td>
                 <td className="px-3 py-2.5">
                   {testing.has(proxy.id) ? <span className="text-xs text-[var(--muted-foreground)]">—</span> : row.latency !== null

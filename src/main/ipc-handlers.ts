@@ -1,5 +1,7 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { readFileSync, writeFileSync } from 'fs'
+import { extname } from 'path'
+import { DATA_ROOT } from './core/paths'
 import { createProfile, getAllProfiles, getProfileById, updateProfile, deleteProfile, bulkDeleteProfiles, queryProfiles } from './services/profile-manager'
 import { createProxy, getAllProxies, updateProxy, deleteProxy, testProxy } from './services/proxy-manager'
 import { createGroup, getAllGroups, updateGroup, deleteGroup } from './services/group-manager'
@@ -374,6 +376,133 @@ export function registerIpcHandlers(): void {
       return { success: true }
     } catch (error) {
       logError(error, 'config:import')
+      return { success: false, error: toErrorMessage(error) }
+    }
+  })
+
+  // Batch import profiles from CSV/JSON file
+  ipcMain.handle('profile:import-file', async (): Promise<IpcResult> => {
+    try {
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        filters: [
+          { name: 'CSV/JSON', extensions: ['csv', 'json', 'txt'] }
+        ],
+        properties: ['openFile']
+      })
+
+      if (canceled || filePaths.length === 0) return { success: false, error: 'Import cancelled' }
+
+      const content = readFileSync(filePaths[0], 'utf-8')
+      const ext = filePaths[0].split('.').pop()?.toLowerCase()
+      let imported: { name: string; notes?: string; groupId?: string }[] = []
+
+      if (ext === 'json') {
+        const data = JSON.parse(content)
+        const arr = Array.isArray(data) ? data : (data.profiles || data.data || [data])
+        imported = arr
+      } else {
+        // CSV/TXT — parse as comma/tab separated
+        const lines = content.split('\n').filter((l) => l.trim())
+        if (lines.length > 0) {
+          const header = lines[0].toLowerCase().replace(/["']/g, '').split(/[,;\t]/).map((h) => h.trim())
+          for (let i = 1; i < lines.length; i++) {
+            const vals = lines[i].replace(/["']/g, '').split(/[,;\t]/).map((v) => v.trim())
+            const row: Record<string, string> = {}
+            header.forEach((h, j) => { row[h] = vals[j] || '' })
+            if (row['name']) {
+              imported.push({ name: row['name'], notes: row['notes'] || row['note'], groupId: row['group_id'] || row['groupid'] || row['group'] })
+            }
+          }
+        }
+      }
+
+      let count = 0
+      for (const item of imported) {
+        if (item.name) {
+          createProfile({
+            name: String(item.name),
+            notes: item.notes ? String(item.notes) : undefined,
+            groupId: item.groupId ? String(item.groupId) : undefined
+          })
+          count++
+        }
+      }
+
+      return { success: true, data: { count } }
+    } catch (error) {
+      logError(error, 'profile:import-file')
+      return { success: false, error: toErrorMessage(error) }
+    }
+  })
+
+  // Extension install from URL
+  ipcMain.handle('extension:install-from-url', async (_event, { url, name }: { url: string; name?: string }): Promise<IpcResult> => {
+    try {
+      const { writeFileSync, mkdirSync, existsSync } = await import('fs')
+      const { join } = await import('path')
+
+      const EXTENSIONS_DIR = join(DATA_ROOT, 'extensions')
+      if (!existsSync(EXTENSIONS_DIR)) {
+        mkdirSync(EXTENSIONS_DIR, { recursive: true })
+      }
+
+      const fileName = name ? `${name.replace(/[^a-zA-Z0-9]/g, '_')}.crx` : `ext_${Date.now()}.crx`
+      const savePath = join(EXTENSIONS_DIR, fileName)
+
+      const response = await fetch(url)
+      if (!response.ok) return { success: false, error: `Download failed: ${response.status}` }
+      const buffer = Buffer.from(await response.arrayBuffer())
+      writeFileSync(savePath, buffer)
+
+      const ext = addExtension({
+        name: name || `Extension ${Date.now().toString(36)}`,
+        version: '1.0.0',
+        description: '',
+        icon: '🧩',
+        enabled: true
+      })
+
+      return { success: true, data: ext }
+    } catch (error) {
+      logError(error, 'extension:install-from-url')
+      return { success: false, error: toErrorMessage(error) }
+    }
+  })
+
+  // Extension install from file
+  ipcMain.handle('extension:install-from-file', async (): Promise<IpcResult> => {
+    try {
+      const { copyFileSync, mkdirSync, existsSync } = await import('fs')
+      const { join, basename } = await import('path')
+
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        filters: [{ name: 'Extensions', extensions: ['crx', 'xpi', 'zip'] }],
+        properties: ['openFile']
+      })
+
+      if (canceled || filePaths.length === 0) return { success: false, error: 'Cancelled' }
+
+      const EXTENSIONS_DIR = join(DATA_ROOT, 'extensions')
+      if (!existsSync(EXTENSIONS_DIR)) {
+        mkdirSync(EXTENSIONS_DIR, { recursive: true })
+      }
+
+      const srcPath = filePaths[0]
+      const destName = `ext_${Date.now()}_${basename(srcPath)}`
+      const destPath = join(EXTENSIONS_DIR, destName)
+      copyFileSync(srcPath, destPath)
+
+      const ext = addExtension({
+        name: basename(srcPath, extname(srcPath)),
+        version: '1.0.0',
+        description: '',
+        icon: '📦',
+        enabled: true
+      })
+
+      return { success: true, data: ext }
+    } catch (error) {
+      logError(error, 'extension:install-from-file')
       return { success: false, error: toErrorMessage(error) }
     }
   })

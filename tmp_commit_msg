@@ -1,15 +1,18 @@
-Phase 5: Error Resilience — full error handling hardening
+Phase 6: Complete Stub Implementations
 
-- Add React ErrorBoundary component with fallback UI
-- Wrap App and 6 pages in per-page ErrorBoundary
-- Add .catch() to all promise chains across 6 renderer files
-- Fix browserLauncher.stop() try-catch + finally (prevents orphaned processes)
-- Wrap initDatabase() SQL execution in try-catch
-- Replace String(error) with toErrorMessage() in all 24 IPC handlers
-- Add errorLogger utility writing structured JSON to LOGS_DIR
-- Wrap all 5 CRUD service files (profile, proxy, group, settings, extension) in try-catch
-- Fix testProxy Set cleanup bug (stuck "testing" state)
-- Fix handleReset passing {} instead of proper defaults
-- Convert Extensions page from local useState to Zustand useExtensionStore
+- Replace fake proxy test with real window.api.proxyTest() call
+- Replace fake latency with real Date.now() timing
+- Display real country from ProxyTestResult instead of hardcoded "—"
+- Add countryToFlag mapping for flag emoji display
+- Implement real ImportDrawer with CSV/JSON parsing via IPC
+- Add profile:import-file IPC handler with dialog + format detection
+- Add extension:install-from-url and extension:install-from-file IPC handlers
+- Update AddExtensionDrawer with real API calls and onInstalled callback
+- Wire Header search bar to global search (Enter navigates to profiles)
+- Implement Save Draft button (localStorage)
+- Wire Header profile/logout buttons to settings/page actions
+- Add globalSearch to useUIStore
+- Add profileImportFile, extensionInstallFromUrl, extensionInstallFromFile to preload API
+- Update type declarations in both env.d.ts and preload/index.d.ts
 
 Co-authored-by: CommandCodeBot <noreply@commandcode.ai>

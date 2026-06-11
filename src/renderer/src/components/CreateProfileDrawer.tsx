@@ -204,7 +204,10 @@ export function CreateProfileDrawer({ open, onClose }: CreateProfileDrawerProps)
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
           <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] font-medium cursor-pointer">Huỷ</button>
           <div className="flex items-center gap-2">
-            <button className="rounded-lg px-4 py-2 bg-[var(--accent)] border border-[var(--border)] text-[var(--foreground)] text-[13px] font-medium cursor-pointer">Lưu nháp</button>
+            <button onClick={() => {
+              localStorage.setItem('ollo-draft-profile', JSON.stringify({ name, notes, groupId: groups.find((g) => g.name === group)?.id }));
+              toast.success('Đã lưu nháp');
+            }} className="rounded-lg px-4 py-2 bg-[var(--accent)] border border-[var(--border)] text-[var(--foreground)] text-[13px] font-medium cursor-pointer">Lưu nháp</button>
             <button onClick={handleCreate} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">Tạo Profile</button>
           </div>
         </div>

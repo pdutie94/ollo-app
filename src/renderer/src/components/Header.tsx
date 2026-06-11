@@ -31,7 +31,15 @@ export function Header() {
   const avatarRef = useRef<HTMLDivElement>(null);
   const { preference, setPreference } = useThemeStore();
   const setActiveView = useUIStore((s) => s.setActiveView);
+  const setGlobalSearch = useUIStore((s) => s.setGlobalSearch);
   const unreadCount = notifs.filter((n) => n.unread).length;
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && search.trim()) {
+      setGlobalSearch(search.trim());
+      setActiveView('profiles');
+    }
+  };
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -51,6 +59,7 @@ export function Header() {
         <div className="flex items-center gap-2 rounded-lg px-3 py-2 flex-1 bg-[var(--card)] border border-[var(--border)]">
           <Search size={14} color="var(--muted-foreground)" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
             placeholder="Tìm profile, proxy..."
             className="bg-transparent border-none outline-none text-xs w-full font-inter"
             style={{ color: search ? "#fff" : "var(--muted-foreground)" }} />
@@ -154,12 +163,12 @@ export function Header() {
                     style={{ color: "var(--muted-foreground)" }}>
                     <Settings size={14} /> Cài đặt
                   </button>
-                  <button onClick={() => setAvatarOpen(false)}
+                  <button onClick={() => { setActiveView("settings"); setAvatarOpen(false); }}
                     className="w-full flex items-center gap-3 px-4 py-1.5 text-[13px] border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
                     style={{ color: "var(--muted-foreground)" }}>
                     <User size={14} /> Hồ sơ
                   </button>
-                  <button onClick={() => setAvatarOpen(false)}
+                  <button onClick={() => { setActiveView("settings"); setAvatarOpen(false); }}
                     className="w-full flex items-center gap-3 px-4 py-1.5 text-[13px] border-none cursor-pointer text-left transition-colors hover:bg-[var(--accent)] rounded-none"
                     style={{ color: "var(--muted-foreground)" }}>
                     <LogOut size={14} /> Thoát

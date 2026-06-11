@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { toast } from "sonner";
 import {
   Plus, Play, Square, Copy, Trash2, Upload, Download, Search,
   MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft,
@@ -49,7 +48,24 @@ function DeleteConfirmDrawer({ count, onConfirm, onCancel }: { count: number; on
 }
 
 function ImportDrawer({ onClose }: { onClose: () => void }) {
-  const [dragging, setDragging] = useState(false); const handleImport = () => { onClose(); toast.success("Import thành công"); };
+  const [dragging, setDragging] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const addToast = useToastStore((s) => s.addToast);
+  const setProfiles = useProfileStore((s) => s.setProfiles);
+
+  const handleImport = async () => {
+    setImporting(true);
+    const res = await window.api.profileImportFile();
+    setImporting(false);
+    if (res.success && res.data) {
+      const count = (res.data as { count: number }).count;
+      addToast(`Đã import ${count} profile`, "success");
+      window.api.profileList().then((r) => { if (r.success && r.data) setProfiles(r.data as Profile[]); }).catch((err) => console.error("Failed to reload profiles:", err));
+      onClose();
+    } else if (res.error !== "Import cancelled") {
+      addToast(res.error ?? "Import thất bại", "error");
+    }
+  };
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
@@ -69,8 +85,8 @@ function ImportDrawer({ onClose }: { onClose: () => void }) {
           <p className="text-xs text-[var(--muted-foreground)] mt-4">Hỗ trợ CSV, JSON · Tối đa 10.000 profile mỗi lần</p>
         </div>
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
-          <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] cursor-pointer">Huỷ</button>
-          <button onClick={handleImport} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">Chọn File</button>
+          <button onClick={onClose} disabled={importing} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] cursor-pointer">Huỷ</button>
+          <button onClick={handleImport} disabled={importing} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">{importing ? "Đang import..." : "Chọn File"}</button>
         </div>
       </div>
     </>
@@ -168,16 +184,7 @@ export function BrowserProfiles() {
     if (res.success) addToast("Đã export cấu hình ra JSON", "success");
     else addToast(res.error ?? "Export thất bại", "error");
   };
-  const handleImport = async () => {
-    const res = await window.api.configImport();
-    if (res.success) {
-      const pRes = await window.api.profileList();
-      if (pRes.success && pRes.data) setProfiles(pRes.data as Profile[]);
-      addToast("Import thành công", "success");
-    } else if (res.error !== "Import cancelled") {
-      addToast(res.error ?? "Import thất bại", "error");
-    }
-  };
+  const handleImportOpen = () => setImportDrawer(true);
   const deleteSelected = async () => { if (!deleteDrawer) return; const res = await window.api.profileBulkDelete(deleteDrawer); if (res.success) { deleteDrawer.forEach((id) => removeProfile(id)); addToast(`Đã xoá ${deleteDrawer.length} profile`, "success"); } setSelected(new Set()); setDeleteDrawer(null); setActiveMenu(null); };
   const deleteSingle = async (id: string) => { const res = await window.api.profileDelete(id); if (res.success) { removeProfile(id); addToast("Đã xoá profile", "success"); } setActiveMenu(null); };
   const duplicateSingle = async (id: string) => {
@@ -258,7 +265,7 @@ export function BrowserProfiles() {
           <ToolbarBtn icon={Copy} label="Nhân bản" disabled={selected.size === 0} onClick={duplicateSelected} />
           <ToolbarBtn icon={Trash2} label="Xoá" disabled={selected.size === 0} danger onClick={() => setDeleteDrawer([...selected])} />
           <div className="w-px h-5 bg-[var(--border)] mx-1" />
-          <ToolbarBtn icon={Upload} label="Import" onClick={handleImport} />
+          <ToolbarBtn icon={Upload} label="Import" onClick={handleImportOpen} />
           <ToolbarBtn icon={Download} label="Export" onClick={handleExport} />
           <div className="flex items-center gap-2 ml-auto rounded-lg px-3 py-1.5 bg-[var(--card)] border border-[var(--border)] min-w-[220px]">
             <Search size={13} color="var(--muted-foreground)" />

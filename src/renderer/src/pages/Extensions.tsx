@@ -21,28 +21,47 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-function AddExtensionDrawer({ onClose }: { onClose: () => void }) {
+function AddExtensionDrawer({ onClose, onInstalled }: { onClose: () => void; onInstalled: () => void }) {
   const [tab, setTab] = useState<"catalog" | "url" | "file">("catalog");
   const [url, setUrl] = useState(""); const [selected, setSelected] = useState<string | null>(null);
+  const [installing, setInstalling] = useState(false);
 
   const handleAdd = async () => {
-    if (tab === "catalog" && selected) {
-      const cat = catalogExtensions.find((e) => e.name === selected);
-      if (!cat) return;
-      const res = await window.api.extensionAdd({ name: cat.name, version: cat.version, description: cat.description, icon: cat.icon, enabled: true });
-      if (res.success && res.data) {
-        toast.success(`Đã cài "${cat.name}"`);
-        onClose();
+    setInstalling(true);
+    try {
+      if (tab === "catalog" && selected) {
+        const cat = catalogExtensions.find((e) => e.name === selected);
+        if (!cat) return;
+        const res = await window.api.extensionAdd({ name: cat.name, version: cat.version, description: cat.description, icon: cat.icon, enabled: true });
+        if (res.success && res.data) {
+          toast.success(`Đã cài "${cat.name}"`);
+          onInstalled();
+          onClose();
+        } else {
+          toast.error(res.error || "Cài đặt thất bại");
+        }
+      } else if (tab === "url") {
+        if (!url.trim()) { toast.error("Nhập URL tiện ích"); return; }
+        const res = await window.api.extensionInstallFromUrl(url.trim());
+        if (res.success) {
+          toast.success("Đã cài tiện ích từ URL");
+          onInstalled();
+          onClose();
+        } else {
+          toast.error(res.error || "Cài đặt thất bại");
+        }
       } else {
-        toast.error(res.error || "Cài đặt thất bại");
+        const res = await window.api.extensionInstallFromFile();
+        if (res.success) {
+          toast.success("Đã cài tiện ích từ file");
+          onInstalled();
+          onClose();
+        } else if (res.error !== "Cancelled") {
+          toast.error(res.error || "Cài đặt thất bại");
+        }
       }
-    } else if (tab === "url") {
-      if (!url.trim()) { toast.error("Nhập URL tiện ích"); return; }
-      toast.success("Đã cài tiện ích từ URL");
-      onClose();
-    } else {
-      toast.success("Đã cài tiện ích từ file");
-      onClose();
+    } finally {
+      setInstalling(false);
     }
   };
 
@@ -96,7 +115,7 @@ function AddExtensionDrawer({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t border-[var(--border)]">
           <button onClick={onClose} className="rounded-lg px-4 py-2 bg-transparent border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] cursor-pointer">Huỷ</button>
           <button onClick={handleAdd} className="rounded-lg px-4 py-2 bg-[var(--primary)] border-none text-[var(--primary-foreground)] text-[13px] font-medium cursor-pointer">
-            {tab === "catalog" ? (selected ? `Cài "${selected}"` : "Chọn tiện ích") : "Cài đặt"}
+            {installing ? "Đang cài đặt..." : tab === "catalog" ? (selected ? `Cài "${selected}"` : "Chọn tiện ích") : "Cài đặt"}
           </button>
         </div>
       </div>
@@ -206,7 +225,9 @@ export function Extensions() {
           ))}
         </div>
       </div>
-      {addDrawer && <AddExtensionDrawer onClose={() => setAddDrawer(false)} />}
+      {addDrawer && <AddExtensionDrawer onClose={() => setAddDrawer(false)} onInstalled={() => {
+        window.api.extensionList().then((res) => { if (res.success && res.data) setExtensions(res.data as AppExtension[]); }).catch((err) => console.error("Failed to reload extensions:", err));
+      }} />}
     </div>
   );
 }
