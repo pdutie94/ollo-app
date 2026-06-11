@@ -8,7 +8,12 @@ import { getExtensions, addExtension, removeExtension, toggleExtension } from '.
 import { setupPartition } from './services/session-manager'
 import { browserLauncher } from './services/browser-launcher'
 import { eventBus } from './core/events/event-bus'
+import { logError } from './core/errors/errorLogger'
 import type { CreateProfileDTO, UpdateProfileDTO, CreateProxyDTO, UpdateProxyDTO, CreateGroupDTO, UserSettings, AppExtension, IpcResult, BrowserEvent, LaunchResult } from '@shared/types'
+
+function toErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
 
 export function registerIpcHandlers(): void {
   // Profile handlers
@@ -17,7 +22,8 @@ export function registerIpcHandlers(): void {
       const profile = createProfile(dto)
       return { success: true, data: profile }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:create')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -26,7 +32,8 @@ export function registerIpcHandlers(): void {
       const result = queryProfiles(params)
       return { success: true, data: result }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:query')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -35,7 +42,8 @@ export function registerIpcHandlers(): void {
       const profiles = getAllProfiles()
       return { success: true, data: profiles }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:list')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -45,7 +53,8 @@ export function registerIpcHandlers(): void {
       if (!profile) return { success: false, error: 'Profile not found' }
       return { success: true, data: profile }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:get')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -55,7 +64,8 @@ export function registerIpcHandlers(): void {
       if (!profile) return { success: false, error: 'Profile not found' }
       return { success: true, data: profile }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:update')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -64,7 +74,8 @@ export function registerIpcHandlers(): void {
       const deleted = deleteProfile(id)
       return { success: true, data: deleted }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:delete')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -73,7 +84,8 @@ export function registerIpcHandlers(): void {
       const count = bulkDeleteProfiles(ids)
       return { success: true, data: count }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:bulk-delete')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -92,7 +104,8 @@ export function registerIpcHandlers(): void {
       })
       return { success: true, data: duplicate }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:duplicate')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -101,7 +114,8 @@ export function registerIpcHandlers(): void {
     try {
       return await browserLauncher.launch(profileId)
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:launch')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -110,7 +124,8 @@ export function registerIpcHandlers(): void {
       await browserLauncher.stop(profileId)
       return { success: true }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:stop')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -120,7 +135,8 @@ export function registerIpcHandlers(): void {
       const result = await browserLauncher.launch(profileId)
       return { success: result.success, error: result.error }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'profile:start')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -130,7 +146,8 @@ export function registerIpcHandlers(): void {
       const proxy = createProxy(dto)
       return { success: true, data: proxy }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'proxy:create')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -139,7 +156,8 @@ export function registerIpcHandlers(): void {
       const proxies = getAllProxies()
       return { success: true, data: proxies }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'proxy:list')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -149,7 +167,8 @@ export function registerIpcHandlers(): void {
       if (!proxy) return { success: false, error: 'Proxy not found' }
       return { success: true, data: proxy }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'proxy:update')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -158,7 +177,8 @@ export function registerIpcHandlers(): void {
       const deleted = deleteProxy(id)
       return { success: true, data: deleted }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'proxy:delete')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -171,7 +191,8 @@ export function registerIpcHandlers(): void {
       })
       return { success: true, data: result }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'proxy:test')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -181,7 +202,8 @@ export function registerIpcHandlers(): void {
       const group = createGroup(dto)
       return { success: true, data: group }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'group:create')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -190,7 +212,8 @@ export function registerIpcHandlers(): void {
       const groups = getAllGroups()
       return { success: true, data: groups }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'group:list')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -200,7 +223,8 @@ export function registerIpcHandlers(): void {
       if (!group) return { success: false, error: 'Group not found' }
       return { success: true, data: group }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'group:update')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -209,7 +233,8 @@ export function registerIpcHandlers(): void {
       const deleted = deleteGroup(id)
       return { success: true, data: deleted }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'group:delete')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -219,7 +244,8 @@ export function registerIpcHandlers(): void {
       const settings = getSettings()
       return { success: true, data: settings }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'settings:get')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -229,7 +255,8 @@ export function registerIpcHandlers(): void {
       if (!settings) return { success: false, error: 'Settings not found' }
       return { success: true, data: settings }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'settings:update')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -239,7 +266,8 @@ export function registerIpcHandlers(): void {
       const extensions = getExtensions()
       return { success: true, data: extensions }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'extension:list')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -248,7 +276,8 @@ export function registerIpcHandlers(): void {
       const ext = addExtension(data)
       return { success: true, data: ext }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'extension:add')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -257,7 +286,8 @@ export function registerIpcHandlers(): void {
       const removed = removeExtension(id)
       return { success: true, data: removed }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'extension:remove')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -267,7 +297,8 @@ export function registerIpcHandlers(): void {
       if (!ext) return { success: false, error: 'Extension not found' }
       return { success: true, data: ext }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'extension:toggle')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -280,7 +311,8 @@ export function registerIpcHandlers(): void {
       await setupPartition(profileId, normalizedProxy, extensionPaths)
       return { success: true }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'session:setup')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -301,7 +333,8 @@ export function registerIpcHandlers(): void {
       writeFileSync(filePath, JSON.stringify({ profiles, proxies, groups }, null, 2), 'utf-8')
       return { success: true }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'config:export')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 
@@ -340,7 +373,8 @@ export function registerIpcHandlers(): void {
 
       return { success: true }
     } catch (error) {
-      return { success: false, error: String(error) }
+      logError(error, 'config:import')
+      return { success: false, error: toErrorMessage(error) }
     }
   })
 

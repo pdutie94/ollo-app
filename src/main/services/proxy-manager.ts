@@ -5,56 +5,81 @@ import { proxies } from '../db/schema'
 import type { Proxy, CreateProxyDTO, UpdateProxyDTO, ProxyTestResult } from '@shared/types'
 
 export function createProxy(data: CreateProxyDTO): Proxy {
-  const id = randomUUID()
-  const now = new Date()
+  try {
+    const id = randomUUID()
+    const now = new Date()
 
-  getDb().insert(proxies).values({
-    id,
-    type: data.type,
-    host: data.host,
-    port: data.port,
-    username: data.username ?? null,
-    password: data.password ?? null,
-    createdAt: now,
-    updatedAt: now
-  }).run()
+    getDb().insert(proxies).values({
+      id,
+      type: data.type,
+      host: data.host,
+      port: data.port,
+      username: data.username ?? null,
+      password: data.password ?? null,
+      createdAt: now,
+      updatedAt: now
+    }).run()
 
-  return getProxyById(id)!
+    return getProxyById(id)!
+  } catch (error) {
+    console.error('proxy-manager.createProxy:', error)
+    throw error
+  }
 }
 
 export function getAllProxies(): Proxy[] {
-  return getDb().select().from(proxies).all() as Proxy[]
+  try {
+    return getDb().select().from(proxies).all() as Proxy[]
+  } catch (error) {
+    console.error('proxy-manager.getAllProxies:', error)
+    throw error
+  }
 }
 
 export function getProxyById(id: string): Proxy | undefined {
-  const result = getDb().select().from(proxies).where(eq(proxies.id, id)).all()
-  return result[0] as Proxy | undefined
+  try {
+    const result = getDb().select().from(proxies).where(eq(proxies.id, id)).all()
+    return result[0] as Proxy | undefined
+  } catch (error) {
+    console.error('proxy-manager.getProxyById:', error)
+    throw error
+  }
 }
 
 export function updateProxy(id: string, data: UpdateProxyDTO): Proxy | undefined {
-  const existing = getProxyById(id)
-  if (!existing) return undefined
+  try {
+    const existing = getProxyById(id)
+    if (!existing) return undefined
 
-  const now = new Date()
-  const updateData: Record<string, unknown> = { updatedAt: now }
+    const now = new Date()
+    const updateData: Record<string, unknown> = { updatedAt: now }
 
-  if (data.type !== undefined) updateData.type = data.type
-  if (data.host !== undefined) updateData.host = data.host
-  if (data.port !== undefined) updateData.port = data.port
-  if (data.username !== undefined) updateData.username = data.username
-  if (data.password !== undefined) updateData.password = data.password
+    if (data.type !== undefined) updateData.type = data.type
+    if (data.host !== undefined) updateData.host = data.host
+    if (data.port !== undefined) updateData.port = data.port
+    if (data.username !== undefined) updateData.username = data.username
+    if (data.password !== undefined) updateData.password = data.password
 
-  getDb().update(proxies).set(updateData).where(eq(proxies.id, id)).run()
+    getDb().update(proxies).set(updateData).where(eq(proxies.id, id)).run()
 
-  return getProxyById(id)
+    return getProxyById(id)
+  } catch (error) {
+    console.error('proxy-manager.updateProxy:', error)
+    throw error
+  }
 }
 
 export function deleteProxy(id: string): boolean {
-  const existing = getProxyById(id)
-  if (!existing) return false
+  try {
+    const existing = getProxyById(id)
+    if (!existing) return false
 
-  getDb().delete(proxies).where(eq(proxies.id, id)).run()
-  return true
+    getDb().delete(proxies).where(eq(proxies.id, id)).run()
+    return true
+  } catch (error) {
+    console.error('proxy-manager.deleteProxy:', error)
+    throw error
+  }
 }
 
 export async function testProxy(

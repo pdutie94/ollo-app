@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Toaster } from "sonner";
 import { MainLayout } from "./components/MainLayout";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Dashboard } from "./pages/Dashboard";
 import { BrowserProfiles } from "./pages/BrowserProfiles";
 import { ProfileGroups } from "./pages/ProfileGroups";
@@ -23,7 +24,7 @@ function App() {
   useEffect(() => {
     window.api.profileList().then((res) => {
       if (res.success && res.data) setProfiles(res.data as Profile[]);
-    });
+    }).catch((err) => console.error("Failed to load profiles:", err));
   }, []);
 
   // Listen for browser events from main process
@@ -43,19 +44,19 @@ function App() {
   const renderPage = () => {
     switch (activeView) {
       case "dashboard":
-        return <Dashboard onNavigate={() => useUIStore.getState().setActiveView("profiles")} />;
+        return <ErrorBoundary pageName="Dashboard"><Dashboard onNavigate={() => useUIStore.getState().setActiveView("profiles")} /></ErrorBoundary>;
       case "profiles":
-        return <BrowserProfiles />;
+        return <ErrorBoundary pageName="BrowserProfiles"><BrowserProfiles /></ErrorBoundary>;
       case "groups":
-        return <ProfileGroups />;
+        return <ErrorBoundary pageName="ProfileGroups"><ProfileGroups /></ErrorBoundary>;
       case "proxies":
-        return <ProxyManagement />;
+        return <ErrorBoundary pageName="ProxyManagement"><ProxyManagement /></ErrorBoundary>;
       case "extensions":
-        return <Extensions />;
+        return <ErrorBoundary pageName="Extensions"><Extensions /></ErrorBoundary>;
       case "settings":
-        return <Settings />;
+        return <ErrorBoundary pageName="Settings"><Settings /></ErrorBoundary>;
       default:
-        return <Dashboard onNavigate={() => useUIStore.getState().setActiveView("profiles")} />;
+        return <ErrorBoundary pageName="Dashboard"><Dashboard onNavigate={() => useUIStore.getState().setActiveView("profiles")} /></ErrorBoundary>;
     }
   };
 

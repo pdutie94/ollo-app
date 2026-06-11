@@ -1,0 +1,15 @@
+Phase 5: Error Resilience — full error handling hardening
+
+- Add React ErrorBoundary component with fallback UI
+- Wrap App and 6 pages in per-page ErrorBoundary
+- Add .catch() to all promise chains across 6 renderer files
+- Fix browserLauncher.stop() try-catch + finally (prevents orphaned processes)
+- Wrap initDatabase() SQL execution in try-catch
+- Replace String(error) with toErrorMessage() in all 24 IPC handlers
+- Add errorLogger utility writing structured JSON to LOGS_DIR
+- Wrap all 5 CRUD service files (profile, proxy, group, settings, extension) in try-catch
+- Fix testProxy Set cleanup bug (stuck "testing" state)
+- Fix handleReset passing {} instead of proper defaults
+- Convert Extensions page from local useState to Zustand useExtensionStore
+
+Co-authored-by: CommandCodeBot <noreply@commandcode.ai>

@@ -59,15 +59,20 @@ class BrowserLauncher {
     const handle = processManager.getHandle(profileId)
     if (!handle) return
 
-    processManager.deregister(profileId)
-    await this.runtime.stop(handle)
+    try {
+      await this.runtime.stop(handle)
+    } catch (error: unknown) {
+      console.error(`Failed to stop browser for profile ${profileId}:`, error)
+    } finally {
+      processManager.deregister(profileId)
 
-    eventBus.emit('profile:stopped', {
-      profileId,
-      timestamp: new Date().toISOString()
-    })
+      eventBus.emit('profile:stopped', {
+        profileId,
+        timestamp: new Date().toISOString()
+      })
 
-    updateProfile(profileId, { status: 'stopped' })
+      updateProfile(profileId, { status: 'stopped' })
+    }
   }
 }
 

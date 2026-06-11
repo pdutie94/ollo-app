@@ -104,9 +104,9 @@ export function BrowserProfiles() {
   const PER_PAGE = 8;
 
   useEffect(() => {
-    window.api.profileList().then((res) => { if (res.success && res.data) setProfiles(res.data as Profile[]); });
-    window.api.groupList().then((res) => { if (res.success && res.data) setGroups(res.data as Group[]); });
-    window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); });
+    window.api.profileList().then((res) => { if (res.success && res.data) setProfiles(res.data as Profile[]); }).catch((err) => console.error("Failed to load profiles:", err));
+    window.api.groupList().then((res) => { if (res.success && res.data) setGroups(res.data as Group[]); }).catch((err) => console.error("Failed to load groups:", err));
+    window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); }).catch((err) => console.error("Failed to load proxies:", err));
   }, []);
 
   const getGroupName = (groupId: string | null) => {
@@ -184,7 +184,7 @@ export function BrowserProfiles() {
     const res = await window.api.profileDuplicate(id);
     if (res.success && res.data) {
       addToast("Đã nhân bản profile", "success");
-      window.api.profileList().then((r) => { if (r.success && r.data) setProfiles(r.data as Profile[]); });
+      window.api.profileList().then((r) => { if (r.success && r.data) setProfiles(r.data as Profile[]); }).catch((err) => console.error("Failed to reload profiles:", err));
     } else {
       addToast(res.error ?? "Nhân bản thất bại", "error");
     }

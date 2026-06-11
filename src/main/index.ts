@@ -40,10 +40,18 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   // Ensure data directories exist
-  ensureDirs()
+  try {
+    ensureDirs()
+  } catch (error) {
+    console.error('Failed to create data directories:', error)
+  }
 
   // Initialize database
-  initDatabase()
+  try {
+    initDatabase()
+  } catch (error) {
+    console.error('Failed to initialize database:', error)
+  }
 
   // Register IPC handlers
   registerIpcHandlers()

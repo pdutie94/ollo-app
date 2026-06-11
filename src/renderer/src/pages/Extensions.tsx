@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Upload, Trash2, AlertCircle, X, ExternalLink } from "lucide-react";
+import { useExtensionStore } from "@/store/useExtensionStore";
 import type { AppExtension } from "@shared/types";
 
 const catalogExtensions = [
@@ -104,18 +105,22 @@ function AddExtensionDrawer({ onClose }: { onClose: () => void }) {
 }
 
 export function Extensions() {
-  const [extensions, setExtensions] = useState<AppExtension[]>([]);
+  const extensions = useExtensionStore((s) => s.extensions);
+  const setExtensions = useExtensionStore((s) => s.setExtensions);
+  const removeExtFromStore = useExtensionStore((s) => s.removeExtension);
+  const toggleExtInStore = useExtensionStore((s) => s.toggleExtension);
   const [filter, setFilter] = useState<"all" | "enabled" | "disabled">("all");
   const [addDrawer, setAddDrawer] = useState(false);
 
   useEffect(() => {
-    window.api.extensionList().then((res) => { if (res.success && res.data) setExtensions(res.data as AppExtension[]); });
+    window.api.extensionList().then((res) => { if (res.success && res.data) setExtensions(res.data as AppExtension[]); }).catch((err) => console.error("Failed to load extensions:", err));
   }, []);
 
   const toggleExtension = async (id: string, current: boolean) => {
     const res = await window.api.extensionToggle(id, !current);
     if (res.success && res.data) {
-      setExtensions((exts) => exts.map((e) => (e.id === id ? (res.data as AppExtension) : e)));
+      toggleExtInStore(id, !current);
+      setExtensions(extensions.map((e) => (e.id === id ? (res.data as AppExtension) : e)));
     }
   };
 
@@ -123,7 +128,7 @@ export function Extensions() {
     const ext = extensions.find((e) => e.id === id);
     const res = await window.api.extensionRemove(id);
     if (res.success) {
-      setExtensions((exts) => exts.filter((e) => e.id !== id));
+      removeExtFromStore(id);
       toast.success(`Đã xoá "${ext?.name}"`);
     } else {
       toast.error(res.error || "Xoá thất bại");

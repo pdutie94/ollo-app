@@ -27,9 +27,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const toasts = useToastStore((s) => s.toasts);
 
   useEffect(() => {
-    window.api.profileList().then((res) => { if (res.success && res.data) setProfiles(res.data as Profile[]); });
-    window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); });
-    window.api.groupList().then((res) => { if (res.success && res.data) setGroups(res.data as Group[]); });
+    window.api.profileList().then((res) => { if (res.success && res.data) setProfiles(res.data as Profile[]); }).catch((err) => console.error("Failed to load profiles:", err));
+    window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); }).catch((err) => console.error("Failed to load proxies:", err));
+    window.api.groupList().then((res) => { if (res.success && res.data) setGroups(res.data as Group[]); }).catch((err) => console.error("Failed to load groups:", err));
   }, []);
 
   const totalProfiles = profiles.length;

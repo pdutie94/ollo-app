@@ -156,7 +156,7 @@ export function Settings() {
       } else {
         setLoading(false);
       }
-    });
+    }).catch((err) => { console.error("Failed to load settings:", err); setLoading(false); });
   }, []);
 
   const handleSave = async () => {
@@ -172,7 +172,18 @@ export function Settings() {
 
   const handleReset = async () => {
     setSaving(true);
-    const res = await window.api.settingsUpdate({} as UserSettings);
+    const defaults: UserSettings = {
+      defaultWorkspace: 'Workspace Alpha', language: 'Tiếng Việt', autoSave: true,
+      startWithSystem: false, minimizeToTray: true, checkUpdates: true, telemetry: false,
+      defaultBrowser: 'Chromium (Mới nhất)', maxConcurrentProfiles: 50, browserCache: true,
+      gpuAcceleration: true, sandboxMode: true, debugPort: 9222, defaultOS: 'Windows 11',
+      canvasSpoofing: true, webglSpoofing: true, audioSpoofing: true, webrtcProtection: true,
+      fontFingerprintGuard: false, autoTimezone: true, defaultResolution: '1920×1080',
+      profileEncryption: true, masterPassword: false, autoLockTimeout: 'Không',
+      auditLogging: true, twoFactorAuth: false, apiKey: '', apiAccess: true,
+      webhookUrl: '', rateLimit: 300, ipAllowlist: false
+    };
+    const res = await window.api.settingsUpdate(defaults);
     if (res.success && res.data) {
       const s = res.data as Settings;
       setSettings(s.data || {});

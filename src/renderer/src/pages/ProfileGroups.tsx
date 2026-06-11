@@ -116,7 +116,7 @@ export function ProfileGroups() {
   const [editGroup, setEditGroup] = useState<Group | undefined>(undefined);
 
   useEffect(() => {
-    window.api.groupList().then((res) => { if (res.success && res.data) setGroups(res.data as Group[]); });
+    window.api.groupList().then((res) => { if (res.success && res.data) setGroups(res.data as Group[]); }).catch((err) => console.error("Failed to load groups:", err));
   }, []);
 
   const getGroupStats = (groupId: string) => {

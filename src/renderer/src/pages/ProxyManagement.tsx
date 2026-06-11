@@ -126,7 +126,7 @@ export function ProxyManagement() {
   const [statusMap, setStatusMap] = useState<Record<string, ProxyStatus>>({});
 
   useEffect(() => {
-    window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); });
+    window.api.proxyList().then((res) => { if (res.success && res.data) setProxies(res.data as Proxy[]); }).catch((err) => console.error("Failed to load proxies:", err));
   }, []);
 
   const getDisplayRow = (p: Proxy) => ({
@@ -139,26 +139,29 @@ export function ProxyManagement() {
 
   const testProxy = async (id: string) => {
     setTesting((t) => new Set([...t, id]));
-    const p = proxies.find((px) => px.id === id);
-    if (!p) return;
+    try {
+      const p = proxies.find((px) => px.id === id);
+      if (!p) return;
 
-    const res = await window.api.proxyTest(p as unknown as CreateProxyDTO);
-    if (res.success && res.data) {
-      const result = res.data as ProxyTestResult;
-      setStatusMap((s) => ({ ...s, [id]: result.success ? "running" : "error" }));
-      if (result.ip) {
-        const ms = Math.floor(Math.random() * 280) + 45;
-        setLatencyMap((l) => ({ ...l, [id]: ms }));
-        toast(`Proxy hoạt động · ${ms}ms`, { style: { background: "#22C55E", color: "#fff" } });
+      const res = await window.api.proxyTest(p as unknown as CreateProxyDTO);
+      if (res.success && res.data) {
+        const result = res.data as ProxyTestResult;
+        setStatusMap((s) => ({ ...s, [id]: result.success ? "running" : "error" }));
+        if (result.ip) {
+          const ms = Math.floor(Math.random() * 280) + 45;
+          setLatencyMap((l) => ({ ...l, [id]: ms }));
+          toast(`Proxy hoạt động · ${ms}ms`, { style: { background: "#22C55E", color: "#fff" } });
+        } else {
+          setLatencyMap((l) => ({ ...l, [id]: null }));
+          toast("Kiểm tra thất bại", { style: { background: "#EF4444", color: "#fff" } });
+        }
       } else {
-        setLatencyMap((l) => ({ ...l, [id]: null }));
+        setStatusMap((s) => ({ ...s, [id]: "error" }));
         toast("Kiểm tra thất bại", { style: { background: "#EF4444", color: "#fff" } });
       }
-    } else {
-      setStatusMap((s) => ({ ...s, [id]: "error" }));
-      toast("Kiểm tra thất bại", { style: { background: "#EF4444", color: "#fff" } });
+    } finally {
+      setTesting((t) => { const next = new Set(t); next.delete(id); return next; });
     }
-    setTesting((t) => { const next = new Set(t); next.delete(id); return next; });
   };
 
   const deleteProxy = async (id: string) => {

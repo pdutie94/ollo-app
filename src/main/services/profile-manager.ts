@@ -5,65 +5,95 @@ import { profiles } from '../db/schema'
 import type { Profile, CreateProfileDTO, UpdateProfileDTO } from '@shared/types'
 
 export function createProfile(data: CreateProfileDTO): Profile {
-  const id = randomUUID()
-  const now = new Date()
+  try {
+    const id = randomUUID()
+    const now = new Date()
 
-  getDb().insert(profiles).values({
-    id,
-    name: data.name,
-    notes: data.notes ?? null,
-    groupId: data.groupId ?? null,
-    proxyId: data.proxyId ?? null,
-    userAgent: data.userAgent ?? null,
-    tags: data.tags ?? [],
-    status: 'stopped',
-    createdAt: now,
-    updatedAt: now
-  }).run()
+    getDb().insert(profiles).values({
+      id,
+      name: data.name,
+      notes: data.notes ?? null,
+      groupId: data.groupId ?? null,
+      proxyId: data.proxyId ?? null,
+      userAgent: data.userAgent ?? null,
+      tags: data.tags ?? [],
+      status: 'stopped',
+      createdAt: now,
+      updatedAt: now
+    }).run()
 
-  return getProfileById(id)!
+    return getProfileById(id)!
+  } catch (error) {
+    console.error('profile-manager.createProfile:', error)
+    throw error
+  }
 }
 
 export function getAllProfiles(): Profile[] {
-  return getDb().select().from(profiles).all() as Profile[]
+  try {
+    return getDb().select().from(profiles).all() as Profile[]
+  } catch (error) {
+    console.error('profile-manager.getAllProfiles:', error)
+    throw error
+  }
 }
 
 export function getProfileById(id: string): Profile | undefined {
-  const result = getDb().select().from(profiles).where(eq(profiles.id, id)).all()
-  return result[0] as Profile | undefined
+  try {
+    const result = getDb().select().from(profiles).where(eq(profiles.id, id)).all()
+    return result[0] as Profile | undefined
+  } catch (error) {
+    console.error('profile-manager.getProfileById:', error)
+    throw error
+  }
 }
 
 export function updateProfile(id: string, data: UpdateProfileDTO): Profile | undefined {
-  const existing = getProfileById(id)
-  if (!existing) return undefined
+  try {
+    const existing = getProfileById(id)
+    if (!existing) return undefined
 
-  const now = new Date()
-  const updateData: Record<string, unknown> = { updatedAt: now }
+    const now = new Date()
+    const updateData: Record<string, unknown> = { updatedAt: now }
 
-  if (data.name !== undefined) updateData.name = data.name
-  if (data.notes !== undefined) updateData.notes = data.notes
-  if (data.groupId !== undefined) updateData.groupId = data.groupId
-  if (data.proxyId !== undefined) updateData.proxyId = data.proxyId
-  if (data.userAgent !== undefined) updateData.userAgent = data.userAgent
-  if (data.tags !== undefined) updateData.tags = data.tags
-  if (data.status !== undefined) updateData.status = data.status
+    if (data.name !== undefined) updateData.name = data.name
+    if (data.notes !== undefined) updateData.notes = data.notes
+    if (data.groupId !== undefined) updateData.groupId = data.groupId
+    if (data.proxyId !== undefined) updateData.proxyId = data.proxyId
+    if (data.userAgent !== undefined) updateData.userAgent = data.userAgent
+    if (data.tags !== undefined) updateData.tags = data.tags
+    if (data.status !== undefined) updateData.status = data.status
 
-  getDb().update(profiles).set(updateData).where(eq(profiles.id, id)).run()
+    getDb().update(profiles).set(updateData).where(eq(profiles.id, id)).run()
 
-  return getProfileById(id)
+    return getProfileById(id)
+  } catch (error) {
+    console.error('profile-manager.updateProfile:', error)
+    throw error
+  }
 }
 
 export function deleteProfile(id: string): boolean {
-  const existing = getProfileById(id)
-  if (!existing) return false
+  try {
+    const existing = getProfileById(id)
+    if (!existing) return false
 
-  getDb().delete(profiles).where(eq(profiles.id, id)).run()
-  return true
+    getDb().delete(profiles).where(eq(profiles.id, id)).run()
+    return true
+  } catch (error) {
+    console.error('profile-manager.deleteProfile:', error)
+    throw error
+  }
 }
 
 export function bulkDeleteProfiles(ids: string[]): number {
-  const result = getDb().delete(profiles).where(inArray(profiles.id, ids)).run()
-  return result.changes
+  try {
+    const result = getDb().delete(profiles).where(inArray(profiles.id, ids)).run()
+    return result.changes
+  } catch (error) {
+    console.error('profile-manager.bulkDeleteProfiles:', error)
+    throw error
+  }
 }
 
 export interface ProfileQueryParams {
