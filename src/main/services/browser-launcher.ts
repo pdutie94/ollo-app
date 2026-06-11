@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import type { BrowserRuntime, ProxyLaunchConfig } from './browser-runtime'
 import { PlaywrightRuntime } from './playwright-runtime'
 import { processManager } from './process-manager'
@@ -6,6 +7,7 @@ import { eventBus } from '../core/events/event-bus'
 import { recordEvent } from './event-history'
 import { getProfileById, updateProfile } from './profile-manager'
 import { getProxyById } from './proxy-manager'
+import { getEnabledExtensions } from './extension-manager'
 import type { Proxy } from '@shared/types'
 
 class BrowserLauncher {
@@ -39,8 +41,15 @@ class BrowserLauncher {
       }
 
       const userDataDir = getUserDataDir(profileId)
-      // 8.2.2: Pass fingerprint config to runtime
-      const handle = await this.runtime.launch(profileId, userDataDir, proxyConfig, profile.fingerprint)
+
+      // 9.2.1: Query enabled extensions with valid install paths
+      const enabledExtensions = getEnabledExtensions()
+      const extensionPaths = enabledExtensions
+        .map((e) => e.installPath!)
+        .filter((p) => existsSync(p))
+
+      // 8.2.2: Pass fingerprint config + extensions to runtime
+      const handle = await this.runtime.launch(profileId, userDataDir, proxyConfig, profile.fingerprint, extensionPaths)
       processManager.register(handle)
 
       updateProfile(profileId, { status: 'running' })

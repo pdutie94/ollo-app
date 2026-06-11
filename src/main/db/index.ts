@@ -36,6 +36,18 @@ export function initDatabase(): ReturnType<typeof drizzle<typeof schema>> {
       }
     }
 
+    // Check if settings has 'data' column; add if missing
+    const settingsDataColumnCheck = sqlite.prepare(
+      "SELECT COUNT(*) as cnt FROM pragma_table_info('settings') WHERE name='data'"
+    ).get() as { cnt: number }
+    if (settingsDataColumnCheck.cnt === 0) {
+      try {
+        sqlite.exec("ALTER TABLE settings ADD COLUMN data text DEFAULT '{}'")
+      } catch (e) {
+        console.error('Failed to add settings.data column:', e)
+      }
+    }
+
     if (tableCount.cnt < 4) {
       const migrationPath = join(app.getAppPath(), '..', '..', 'drizzle', '0000_warm_mystique.sql')
       // Try alternate paths (dev vs prod)

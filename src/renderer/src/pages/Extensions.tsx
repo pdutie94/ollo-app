@@ -76,7 +76,7 @@ function AddExtensionDrawer({ onClose, onInstalled }: { onClose: () => void; onI
         <div className="flex gap-1 mx-6 mt-3 p-1 rounded-lg bg-[var(--accent)]">
           {(["catalog", "url", "file"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} className="flex-1 py-1.5 rounded-md capitalize text-xs border-none cursor-pointer"
-              style={{ background: tab === t ? "var(--card)" : "transparent", color: tab === t ? "#fff" : "var(--muted-foreground)", fontWeight: tab === t ? 500 : 400 }}>
+              style={{ background: tab === t ? "var(--card)" : "transparent", color: tab === t ? "var(--primary)" : "var(--muted-foreground)", fontWeight: tab === t ? 500 : 400 }}>
               {t === "url" ? "Từ URL" : t === "file" ? "Từ file" : "Danh mục"}
             </button>
           ))}
@@ -154,6 +154,31 @@ export function Extensions() {
     }
   };
 
+  // 9.3.2: Load real file sizes for extensions
+  const [sizeMap, setSizeMap] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const loadSizes = async () => {
+      const map: Record<string, string> = {};
+      for (const ext of extensions) {
+        if (ext.installPath) {
+          try {
+            const res = await window.api.extensionSize(ext.id);
+            if (res.success && res.data) {
+              map[ext.id] = (res.data as { formatted: string }).formatted;
+            }
+          } catch { /* ignore */ }
+        }
+      }
+      setSizeMap(map);
+    };
+    loadSizes();
+  }, [extensions]);
+
+  const getExtensionSize = (ext: AppExtension): string => {
+    if (sizeMap[ext.id]) return sizeMap[ext.id];
+    return '—';
+  };
+
   const filtered = extensions.filter((e) => { if (filter === "enabled") return e.enabled; if (filter === "disabled") return !e.enabled; return true; });
   const enabledCount = extensions.filter((e) => e.enabled).length;
   const updateCount = 0;
@@ -169,7 +194,15 @@ export function Extensions() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => toast.info("Chọn file .crx hoặc .xpi để import")}
+            <button onClick={async () => {
+              const res = await window.api.extensionInstallFromFile();
+              if (res.success) {
+                toast.success("Đã import tiện ích");
+                window.api.extensionList().then((r) => { if (r.success && r.data) setExtensions(r.data as AppExtension[]); });
+              } else if (res.error !== "Cancelled") {
+                toast.error(res.error || "Import thất bại");
+              }
+            }}
               className="flex items-center gap-2 rounded-lg px-3 py-2 bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)] text-[13px] font-medium cursor-pointer">
               <Upload size={14} /> Import
             </button>
@@ -212,8 +245,8 @@ export function Extensions() {
               </div>
               <div className="flex items-center gap-6 shrink-0">
                 <div className="text-right">
-                  <p className="text-xs text-[var(--muted-foreground)] font-inter">—</p>
-                  <p className="text-[10px]" style={{ color: "rgba(161,168,181,0.5)" }}>dung lượng</p>
+                  <p className="text-xs text-[var(--muted-foreground)] font-inter">{getExtensionSize(ext)}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]/60">dung lượng</p>
                 </div>
                 <Toggle on={ext.enabled} onChange={() => toggleExtension(ext.id, ext.enabled)} />
                 <div className="flex items-center gap-1">

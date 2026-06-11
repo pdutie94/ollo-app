@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import { chromium } from 'playwright'
 import type { BrowserRuntime, RuntimeHandle, ProxyLaunchConfig } from './browser-runtime'
 import type { ProfileFingerprint } from '@shared/types'
@@ -10,7 +11,8 @@ export class PlaywrightRuntime implements BrowserRuntime {
     profileId: string,
     userDataDir: string,
     proxyConfig: ProxyLaunchConfig | null,
-    fingerprint?: ProfileFingerprint | null  // 8.2.2
+    fingerprint?: ProfileFingerprint | null,
+    extensionPaths?: string[]
   ): Promise<RuntimeHandle> {
     const args = [
       '--disable-blink-features=AutomationControlled',
@@ -23,6 +25,18 @@ export class PlaywrightRuntime implements BrowserRuntime {
     if (fingerprint) {
       const fpArgs = buildFingerprintArgs(fingerprint)
       args.push(...fpArgs)
+    }
+
+    // 9.2.2 + 9.2.3: Load extensions via CLI args
+    if (extensionPaths && extensionPaths.length > 0) {
+      const validPaths = extensionPaths.filter((p) => existsSync(p))
+      if (validPaths.length > 0) {
+        args.push(`--load-extension=${validPaths.join(',')}`)
+        args.push(`--disable-extensions-except=${validPaths.join(',')}`)
+        console.log(`[PlaywrightRuntime] Loading extensions:`, validPaths)
+      } else {
+        console.warn(`[PlaywrightRuntime] No valid extension paths found from:`, extensionPaths)
+      }
     }
 
     // 8.2.6: Resolution override via viewport
@@ -47,6 +61,24 @@ export class PlaywrightRuntime implements BrowserRuntime {
     const initScripts = buildFingerprintInitScripts(fingerprint)
     for (const script of initScripts) {
       await context.addInitScript(script)
+    }
+
+    // 9.2.4: Verify extensions loaded
+    if (extensionPaths && extensionPaths.length > 0) {
+      try {
+        const pages = context.pages()
+        if (pages.length > 0) {
+          const loaded = await pages[0].evaluate(() => {
+            try {
+              // @ts-ignore chrome.runtime is available in extension context
+              return chrome?.runtime?.id ? true : false
+            } catch { return false }
+          }).catch(() => false)
+          console.log(`[PlaywrightRuntime] Extension context verified: ${loaded}`)
+        }
+      } catch (e) {
+        console.warn('[PlaywrightRuntime] Could not verify extensions:', e)
+      }
     }
 
     return new PlaywrightHandle(profileId, context)

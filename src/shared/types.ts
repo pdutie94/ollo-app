@@ -176,4 +176,6 @@ export interface AppExtension {
   description: string
   icon: string
   enabled: boolean
+  installPath?: string
+  installDate?: string
 }

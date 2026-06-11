@@ -89,7 +89,9 @@ const api = {
   extensionInstallFromUrl: (url: string, name?: string): Promise<IpcResult> =>
     ipcRenderer.invoke('extension:install-from-url', { url, name }),
   extensionInstallFromFile: (): Promise<IpcResult> =>
-    ipcRenderer.invoke('extension:install-from-file')
+    ipcRenderer.invoke('extension:install-from-file'),
+  extensionSize: (id: string): Promise<IpcResult> =>
+    ipcRenderer.invoke('extension:size', id)
 }
 
 if (process.contextIsolated) {

@@ -37,6 +37,7 @@ interface OlloAPI {
   extensionToggle: (id: string, enabled: boolean) => Promise<IpcResult>
   extensionInstallFromUrl: (url: string, name?: string) => Promise<IpcResult>
   extensionInstallFromFile: () => Promise<IpcResult>
+  extensionSize: (id: string) => Promise<IpcResult>
   onBrowserEvent: (callback: (event: BrowserEvent) => void) => (() => void)
 }
 

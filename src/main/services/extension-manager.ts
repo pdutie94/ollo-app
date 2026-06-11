@@ -58,6 +58,18 @@ export function getExtensions(): AppExtension[] {
   }
 }
 
+/**
+ * Return only enabled extensions that have an installPath on disk.
+ */
+export function getEnabledExtensions(): AppExtension[] {
+  try {
+    return getExtensions().filter((e) => e.enabled && !!e.installPath)
+  } catch (error) {
+    console.error('extension-manager.getEnabledExtensions:', error)
+    return []
+  }
+}
+
 export function addExtension(data: Omit<AppExtension, 'id'>): AppExtension {
   try {
     const ext: AppExtension = {
@@ -99,5 +111,28 @@ export function toggleExtension(id: string, enabled: boolean): AppExtension | un
   } catch (error) {
     console.error('extension-manager.toggleExtension:', error)
     throw error
+  }
+}
+
+export function updateExtensionInstallPath(id: string, installPath: string): AppExtension | undefined {
+  try {
+    const all = getExtensions()
+    const idx = all.findIndex((e) => e.id === id)
+    if (idx === -1) return undefined
+    all[idx] = { ...all[idx], installPath, installDate: new Date().toISOString() }
+    saveExtensions(all)
+    return all[idx]
+  } catch (error) {
+    console.error('extension-manager.updateExtensionInstallPath:', error)
+    throw error
+  }
+}
+
+export function getExtensionById(id: string): AppExtension | undefined {
+  try {
+    return getExtensions().find((e) => e.id === id)
+  } catch (error) {
+    console.error('extension-manager.getExtensionById:', error)
+    return undefined
   }
 }

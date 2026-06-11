@@ -10,7 +10,8 @@ export interface BrowserRuntime {
     profileId: string,
     userDataDir: string,
     proxyConfig: ProxyLaunchConfig | null,
-    fingerprint?: ProfileFingerprint | null  // 8.2.2
+    fingerprint?: ProfileFingerprint | null,
+    extensionPaths?: string[]
   ): Promise<RuntimeHandle>
   stop(handle: RuntimeHandle): Promise<void>
 }

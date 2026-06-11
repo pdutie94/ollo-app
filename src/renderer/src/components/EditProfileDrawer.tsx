@@ -135,10 +135,10 @@ export function EditProfileDrawer({ profile, onClose }: EditProfileDrawerProps) 
           <button onClick={onClose} className="rounded-lg p-1.5 bg-transparent border-none cursor-pointer text-[var(--muted-foreground)]"><X size={18} /></button>
         </div>
 
-        <div className="flex items-center gap-1 px-6 py-2 shrink-0 border-b border-[var(--border)]">
+        <div className="flex gap-1 mx-6 mt-3 mb-2 p-1 rounded-lg bg-[var(--accent)]">
           {sections.map((s) => (
-            <button key={s} onClick={() => setActiveSection(s)} className="rounded-md px-3 py-1.5 text-xs border-none cursor-pointer"
-              style={{ background: activeSection === s ? "rgba(79,124,255,0.15)" : "transparent", color: activeSection === s ? "var(--primary)" : "var(--muted-foreground)", fontWeight: activeSection === s ? 500 : 400 }}>
+            <button key={s} onClick={() => setActiveSection(s)} className="flex-1 py-1.5 rounded-md text-xs border-none cursor-pointer"
+              style={{ background: activeSection === s ? "var(--card)" : "transparent", color: activeSection === s ? "var(--primary)" : "var(--muted-foreground)", fontWeight: activeSection === s ? 500 : 400 }}>
               {s}
             </button>
           ))}
